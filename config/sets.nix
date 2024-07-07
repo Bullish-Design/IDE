@@ -8,7 +8,7 @@
     opts = {
       # Enable relative line numbers
       number = true;
-      relativenumber = true;
+      relativenumber = false; # **CHANGED** 
 
       # Set tabs to 2 spaces
       tabstop = 2;
@@ -98,11 +98,11 @@
       list = true; # Show invisible characters (tabs, eol, ...)
       listchars = "eol:↲,tab:|->,lead:·,space: ,trail:•,extends:→,precedes:←,nbsp:␣";
 
-      # More space in the neovim command line for displaying messages
-      cmdheight = 2;
+      # **CHANGED** More space in the neovim command line for displaying messages
+      cmdheight = 3;
 
-      # We don't need to see things like INSERT anymore
-      showmode = false;
+      # **CHANGED** We don't need to see things like INSERT anymore
+      showmode = true;
 
       # Maximum number of items to show in the popup menu (0 means "use available screen space")
       pumheight = 0;
