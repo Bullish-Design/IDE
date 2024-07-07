@@ -46,7 +46,7 @@
     #  };
     #}
 
-    # General maps
+    # ----- General maps -----
     {
       mode = "n";
       key = "<leader>f";
@@ -107,7 +107,7 @@
       action = "+test";
     }
 
-    # Tabs
+    # ----- Tabs -----
     {
       mode = "n";
       key = "<leader><tab>l";
@@ -168,7 +168,7 @@
       };
     }
 
-    # Windows
+    # ----- Windows -----
     {
       mode = "n";
       key = "<leader>ww";
@@ -239,7 +239,7 @@
       };
     }
 
-    # Quit/Session
+    # ----- Quit/Session -----
     {
       mode = "n";
       key = "<leader>qq";
@@ -280,6 +280,7 @@
       };
     }
 
+    # ----- Line Numbers/Wrap/Highlight -----
     {
       mode = "n";
       key = "<leader>ul";
@@ -379,7 +380,7 @@
       };
     }
 
-    # Remap for dealing with word wrap and adding jumps to the jumplist.
+    # ----- Remap for dealing with word wrap and adding jumps to the jumplist. -----
     {
       mode = "n";
       key = "j";
@@ -422,7 +423,7 @@
       };
     }
 
-    # Paste stuff without saving the deleted word into the buffer
+    # ----- Paste stuff without saving the deleted word into the buffer -----
     {
       mode = "x";
       key = "<leader>p";
@@ -432,7 +433,7 @@
       };
     }
 
-    # Copy stuff to system clipboard with <leader> + y or just y to have it just in vim
+    # ----- Copy stuff to system clipboard with <leader> + y or just y to have it just in vim -----
     {
       mode = ["n" "v"];
       key = "<leader>y";
@@ -451,7 +452,7 @@
       };
     }
 
-    # Delete to void register
+    # ----- Delete to void register -----
     {
       mode = ["n" "v"];
       key = "<leader>D";

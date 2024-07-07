@@ -6,6 +6,7 @@
       current_line_blame = false;
     };
   };
+  
   keymaps = [
     {
       mode = ["n" "v"];
