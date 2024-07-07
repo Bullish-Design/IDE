@@ -75,7 +75,7 @@
       scrolloff = 8;
 
       # Place a column line
-      colorcolumn = "80";
+      colorcolumn = "120";
 
       # Reduce which-key timeout to 10ms
       timeoutlen = 10;
@@ -95,8 +95,9 @@
       ];
 
       # Enable chars list
-      list = true; # Show invisible characters (tabs, eol, ...)
-      listchars = "eol:↲,tab:|->,lead:·,space: ,trail:•,extends:→,precedes:←,nbsp:␣";
+      list = true; # Show invisible characters (tabs, eol, ...) 
+      #listchars = "eol:↲,tab:|->,lead:·,space: ,trail:•,extends:→,precedes:←,nbsp:␣";
+      listchars = "space: ,trail:•,extends:→,precedes:←,nbsp:␣";
 
       # **CHANGED** More space in the neovim command line for displaying messages
       cmdheight = 3;
