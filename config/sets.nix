@@ -64,7 +64,7 @@
       cursorline = true; # Highlight the line where the cursor is located
 
       # Set fold settings
-      # These options were reccommended by nvim-ufo
+      # These options were reccommended by nvim-ufo. TODO: Investigate further. **TEST CHANGE FOR GIT SCRIPT**
       # See: https://github.com/kevinhwang91/nvim-ufo#minimal-configuration
       foldcolumn = "0";
       foldlevel = 99;
