@@ -21,6 +21,15 @@
         "<space>" = "none";
       };
     };
+    filesystem = {
+      followCurrentFile.enabled = true;
+      filteredItems = {
+        visible = true;
+        hideGitignored = true;
+        hideDotfiles = false;
+        hideByName = [".git"];
+      };
+    };
   };
 
   keymaps = [
