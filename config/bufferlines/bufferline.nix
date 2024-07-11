@@ -2,7 +2,7 @@
   plugins = {
     bufferline = {
       enable = true;
-      separatorStyle = "thick"; # “slant”, “padded_slant”, “slope”, “padded_slope”, “thick”, “thin”
+      separatorStyle = "padded_slant"; # “slant”, “padded_slant”, “slope”, “padded_slope”, “thick”, “thin”
       offsets = [
         {
           filetype = "neo-tree";
@@ -11,6 +11,7 @@
           text_align = "left";
         }
       ];
+      
     };
   };
   keymaps = [
