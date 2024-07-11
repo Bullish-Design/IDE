@@ -66,7 +66,7 @@
     ./utils/nvim-autopairs.nix # - Was disabled, due to ultimate autopair being used. 
     ./utils/nvim-colorizer.nix # - Colors
     ./utils/nvim-surround.nix # - Selecting chunks. Investigate and practice (https://github.com/kylechui/nvim-surround)
-    ./utils/oil.nix # - Edit filesystem like a neovim buffer? Investigate (https://github.com/stevearc/oil.nvim)
+    #./utils/oil.nix # - Edit filesystem like a neovim buffer? Investigate (https://github.com/stevearc/oil.nvim)
     ./utils/persistence.nix # - Session management (https://github.com/folke/persistence.nvim)
     ./utils/plenary.nix # - A collection of Lua functions? Investigate. (https://github.com/nvim-lua/plenary.nvim)
     ./utils/project-nvim.nix # - Project management. Investigate functionality. (https://github.com/ahmedkhalf/project.nvim)

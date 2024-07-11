@@ -2,7 +2,7 @@
 {
   globals.mapleader = " ";
 
-  # TODO: Move general mappings to which-key
+  # TODO: Move general mappings to which-key?
   keymaps = [
     ## Disable arrow keys
     #{
