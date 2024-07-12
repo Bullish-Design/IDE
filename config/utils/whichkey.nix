@@ -19,10 +19,10 @@
       border = "rounded";
       winblend = 0;
       margin = {
-        top = 0;
+        top = 1;
         right = 100;
-        bottom = 0;
-        left = 0;
+        bottom = 2;
+        left = 50;
       };
       # padding = {
       #   top = 1;
