@@ -2,6 +2,7 @@
   # TODO: Implement general mappings
   plugins.which-key = {
     enable = true;
+    preset = "modern";
     ignoreMissing = false;
     icons = {
       breadcrumb = "»";
