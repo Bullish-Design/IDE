@@ -16,7 +16,7 @@
 
 
     window = {
-      border = "rounded";
+      # border = "rounded";
       winblend = 0;
       margin = {
         top = 1;
