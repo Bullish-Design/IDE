@@ -20,9 +20,9 @@
       winblend = 0;
       margin = {
         top = 1;
-        right = 5;
-        bottom = 1;
-        left = 5;
+        right = 0;
+        bottom = 0;
+        left = 0.6;
       };
       # padding = {
       #   top = 1;
@@ -42,7 +42,7 @@
         max = 50;
       };
       spacing = 6;
-      align = "center";
+      align = "left";
     };
   };
 }
