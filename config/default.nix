@@ -70,7 +70,7 @@
     ./utils/persistence.nix # - Session management (https://github.com/folke/persistence.nvim)
     ./utils/plenary.nix # - A collection of Lua functions? Investigate. (https://github.com/nvim-lua/plenary.nvim)
     ./utils/project-nvim.nix # - Project management. Investigate functionality. (https://github.com/ahmedkhalf/project.nvim)
-    ./utils/sidebar.nix # - 
+    #./utils/sidebar.nix # - 
     ./utils/tmux-navigator.nix # - 
     ./utils/todo-comments.nix # - 
     ./utils/toggleterm.nix # - 
