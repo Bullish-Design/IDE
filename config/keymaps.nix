@@ -86,7 +86,7 @@
     {
       mode = "n";
       key = "<leader><Tab>";
-      action = "+sidebar (test)";
+      action = "+sidebar";
     }
 
     {
