@@ -18,18 +18,18 @@
     window = {
       border = "rounded";
       winblend = 0;
-      # margin = {
-      #   top = 1;
-      #   right = 5;
-      #   bottom = 1;
-      #   left = 5;
-      # };
-      padding = {
+      margin = {
         top = 1;
         right = 5;
         bottom = 1;
         left = 5;
       };
+      # padding = {
+      #   top = 1;
+      #   right = 5;
+      #   bottom = 1;
+      #   left = 5;
+      # };
     };
 
     layout = {
