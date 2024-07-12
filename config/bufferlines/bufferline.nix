@@ -11,7 +11,7 @@
           text_align = "left";
         }
         {
-          filetype = "sidebar";
+          filetype = "SidebarNvim";
           text = "";
         }
       ];
