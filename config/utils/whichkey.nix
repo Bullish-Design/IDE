@@ -21,8 +21,8 @@
       margin = {
         top = 1;
         right = 2;
-        bottom = 5;
-        left = 2;
+        bottom = 1;
+        left = 10;
       };
       # padding = {
       #   top = 1;
