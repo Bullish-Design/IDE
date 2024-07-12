@@ -31,5 +31,18 @@
         left = 5;
       };
     };
+
+    layout = {
+      height = {
+        min = 5;
+        max = 25;
+      };
+      width = {
+        min = 25;
+        max = 50;
+      };
+      spacing = 5;
+      align = "center";
+    };
   };
 }
