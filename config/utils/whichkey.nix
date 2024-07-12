@@ -2,12 +2,11 @@
   # TODO: Implement general mappings
   plugins.which-key = {
     enable = true;
-    preset = "modern";
     ignoreMissing = false;
     icons = {
       breadcrumb = "»";
       group = "+";
-      separator = ""; # ➜
+      # separator = ""; # ➜
     };
     
     # Registrations:
@@ -18,7 +17,20 @@
 
     window = {
       border = "rounded";
-      winblend = 0;
+      winblend = 25;
+      # margin = {
+      #   top = 1;
+      #   right = 1;
+      #   bottom = 1;
+      #   left = 1;
+      # };
+      padding = {
+        top = 1;
+        right = 1;
+        bottom = 1;
+        left = 1;
+      };
+      }
     };
   };
 }
