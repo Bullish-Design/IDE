@@ -16,13 +16,13 @@
 
 
     window = {
-      # border = "rounded";
+      border = "rounded";
       winblend = 0;
       margin = {
-        top = 1;
-        right = 0;
-        bottom = 0;
-        left = 100;
+        # top = 1;
+        # right = 0;
+        # bottom = 0;
+        left = 0.6;
       };
       # padding = {
       #   top = 1;
