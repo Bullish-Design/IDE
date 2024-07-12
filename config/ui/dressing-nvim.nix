@@ -2,6 +2,7 @@
   extraPlugins = with pkgs.vimPlugins; [
     dressing-nvim
   ];
+#TODO: Switch this to the nixvim package
   extraConfigLua = ''
     require("dressing").setup({
       input = {

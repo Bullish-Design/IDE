@@ -20,9 +20,9 @@
       winblend = 0;
       margin = {
         top = 1;
-        left = 50;
+        left = 5;
         right = 100;
-        bottom = 2;
+        bottom = 1;
         
       };
       # padding = {
