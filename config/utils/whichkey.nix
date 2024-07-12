@@ -19,17 +19,17 @@
       border = "rounded";
       winblend = 0;
       margin = {
-        top = 3;
-        right = 5;
-        bottom = 1;
-        left = 1;
-      };
-      padding = {
         top = 1;
-        right = 1;
+        right = 2;
         bottom = 5;
-        left = 5;
+        left = 2;
       };
+      # padding = {
+      #   top = 1;
+      #   right = 1;
+      #   bottom = 5;
+      #   left = 5;
+      # };
     };
   };
 }
