@@ -27,7 +27,7 @@
       padding = {
         top = 1;
         right = 1;
-        bottom = 1;
+        bottom = 5;
         left = 5;
       };
     };
