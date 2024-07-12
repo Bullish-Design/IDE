@@ -10,7 +10,12 @@
           highlight = "Directory";
           text_align = "left";
         }
+        {
+          filetype = "sidebar";
+          text = "";
+        }
       ];
+
      indicator.style = "underline";
      
      
