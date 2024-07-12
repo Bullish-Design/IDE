@@ -20,7 +20,7 @@
       winblend = 0;
       margin = {
         top = 0;
-        right = 0.6;
+        right = 100;
         bottom = 0;
         left = 0;
       };
