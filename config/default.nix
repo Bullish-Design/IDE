@@ -53,6 +53,8 @@
     ./ui/nvim-notify.nix # - Different notification manager. Why both?
     ./ui/nui.nix # UI component library? (https://github.com/MunifTanjim/nui.nvim)
 
+    ./mini
+
     ./utils/better-escape.nix # 
     #./utils/neocord.nix # - Discord integration of some sort
     #./utils/flash.nix # - Add on for fast search navigation? https://github.com/folke/flash.nvim
@@ -60,7 +62,7 @@
     ./utils/harpoon.nix # - quicker navigation of files? Investigate if v1 or v2 is being installed https://github.com/ThePrimeagen/harpoon/tree/harpoon2
     ./utils/illuminate.nix # - auto highlighting of other uses of a word https://github.com/RRethy/vim-illuminate
     ./utils/markdown-preview.nix # - 
-    ./utils/mini.nix # - a collection of lua plugins (https://github.com/echasnovski/mini.nvim)
+    #./utils/mini.nix # - a collection of lua plugins (https://github.com/echasnovski/mini.nvim)
     #./utils/neodev.nix # - full IDE style support but just for lua? Also depreciated and recommending lazydev.nvim? (https://github.com/folke/neodev.nvim)
     #./utils/neotest.nix # - **TODO: CHECK PYTHON SUPPORT** Support for running tests within neovim (https://github.com/nvim-neotest/neotest)
     #./utils/nvim-autopairs.nix # - Was disabled, due to ultimate autopair being used. 
