@@ -4,7 +4,7 @@
     ./completion.nix
     ./files.nix
     ./pick.nix
-    ./starter.nix
+    #./starter.nix
   ];
 
   programs.nixvim.plugins.mini = {
