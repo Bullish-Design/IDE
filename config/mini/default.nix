@@ -3,7 +3,7 @@
     ./clue.nix
     ./completion.nix
     ./files.nix
-    ./pick.nix
+    #./pick.nix
     #./starter.nix
   ];
 
@@ -54,7 +54,7 @@
       };
       operators.__empty = null;
       pairs.__empty = null;
-      pick.__empty = null;
+      #pick.__empty = null;
       sessions.__empty = null;
       # statusline = { # TODO
       #   content = {
