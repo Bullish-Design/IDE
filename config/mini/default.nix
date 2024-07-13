@@ -10,7 +10,7 @@
   plugins.mini = {
     enable = true;
     modules = {
-      ai.__empty = null;
+      ai = {};
       # animate = {
       #   cursor.timing.__raw = "require('mini.animate').gen_timing.cubic({ easing = 'out', duration = 10 })";
       #   scroll.timing.__raw = "require('mini.animate').gen_timing.cubic({ easing = 'out', duration = 10 })";
@@ -30,8 +30,8 @@
         silent = true;
       };
       # bracketed.__empty = null;
-      bufremove.__empty = null;
-      comment.__empty = null;
+      bufremove = {};
+      comment = {};
       # cursorword.__empty = null;
       diff.view = {
         signs = {
@@ -53,7 +53,7 @@
       #   window.config.border = "rounded";
       # };
       # operators.__empty = null;
-      pairs.__empty = null;
+      pairs = {};
       #pick.__empty = null;
       # sessions.__empty = null;
       # statusline = { # TODO
