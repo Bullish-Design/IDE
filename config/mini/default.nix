@@ -54,6 +54,7 @@
       };
       operators.__empty = null;
       pairs.__empty = null;
+      pick.__empty = null;
       sessions.__empty = null;
       # statusline = { # TODO
       #   content = {
