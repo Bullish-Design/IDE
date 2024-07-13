@@ -1,13 +1,13 @@
 {
   # programs.nixvim = {
     plugins.mini.modules.files = {
-      keys = {
+      keys = [
         {
           mode = "n";
           keys = "<leader>e";
           command = "lua require('mini.files').open()";
         }
-      };
+      ];
     # autoCmd = [
     #   {
     #     event = "User";
