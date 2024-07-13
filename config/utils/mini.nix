@@ -10,7 +10,26 @@
         };
       };
       cursorword = {};
-      clue = {};
+      clue = {
+        triggers = [
+          {
+            mode = "n";
+            keys = "<leader>";
+          }
+          {
+            mode = "x";
+            keys = "<leader>";
+          }
+        ];
+        window = {
+          config = {
+            border = "rounded";
+            width = "auto";
+          };
+          delay = 0;
+        };
+      };
+
     };
   };
 }
