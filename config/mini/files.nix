@@ -1,5 +1,5 @@
 {
-  programs.nixvim = {
+  # programs.nixvim = {
     plugins.mini.modules.files = {__empty = null;};
     autoCmd = [
       {
@@ -15,5 +15,5 @@
         };
       }
     ];
-  };
+  # };
 }

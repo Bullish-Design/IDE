@@ -1,5 +1,5 @@
 {
-  programs.nixvim.plugins.mini.modules.clue = {
+  plugins.mini.modules.clue = {
     triggers = [
       # leader triggers
       {

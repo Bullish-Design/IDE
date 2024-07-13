@@ -7,7 +7,7 @@
     #./starter.nix
   ];
 
-  programs.nixvim.plugins.mini = {
+  plugins.mini = {
     enable = true;
     modules = {
       ai.__empty = null;
