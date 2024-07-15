@@ -6,4 +6,7 @@
       disable_frontmatter = true;
     };
   };
+  opts = {
+    conceallevel = 1;
+  };
 }
