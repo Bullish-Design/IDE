@@ -39,6 +39,8 @@
 
     ./none-ls/none-ls.nix # Currently not enabled, but keeping in
 
+    ./obsidian/default.nix
+
     ./snippets/luasnip.nix
 
     ./statusline/lualine.nix
