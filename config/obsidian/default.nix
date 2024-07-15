@@ -7,6 +7,6 @@
     };
   };
   opts = {
-    conceallevel = 1;
+    conceallevel = 2;
   };
 }
