@@ -86,7 +86,8 @@
     {
       mode = "n";
       key = "<leader><Tab>";
-      action = "+sidebar";
+      action = "+navigation";
+      options.desc = "Navigation";
     }
 
     {
