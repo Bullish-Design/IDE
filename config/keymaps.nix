@@ -51,36 +51,42 @@
       mode = "n";
       key = "<leader>f";
       action = "+find/file";
+      options.desc = "Find";
     }
 
     {
       mode = "n";
       key = "<leader>s";
       action = "+search";
+      options.desc = "Search";
     }
 
     {
       mode = "n";
       key = "<leader>q";
       action = "+quit/session";
+      options.desc = "Quit/Session";
     }
 
     {
       mode = ["n" "v"];
       key = "<leader>g";
       action = "+git";
+      options.desc = "Git";
     }
 
     {
       mode = "n";
       key = "<leader>u";
       action = "+ui";
+      options.desc = "UI";
     }
 
     {
       mode = "n";
       key = "<leader>w";
       action = "+windows";
+      options.desc = "Windows";
     }
 
     {
@@ -94,18 +100,21 @@
       mode = ["n" "v"];
       key = "<leader>d";
       action = "+debug";
+      options.desc = "Debug";
     }
 
     {
       mode = ["n" "v"];
       key = "<leader>c";
       action = "+code";
+      options.desc = "Code";
     }
 
     {
       mode = ["n" "v"];
       key = "<leader>t";
       action = "+test";
+      options.desc = "Test";
     }
 
     # ----- Tabs -----
