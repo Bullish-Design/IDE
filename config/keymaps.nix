@@ -117,6 +117,50 @@
       options.desc = "Test";
     }
 
+    {
+      mode = "n";
+      key = "<leader>o";
+      action = "+obsidian";
+      options.desc = "Obsidian";
+    }
+
+    # ----- Obsidian -----
+
+    {
+      mode = "n";
+      key = "<leader>ot";
+      action = "<cmd>lua require('obsidian').util.toggle_checkbox()<cr>";
+      options.desc = "Toggle Checkbox";
+    }
+
+    {
+      mode = "n";
+      key = "<leader>oo";
+      action = "<cmd>ObsidianQuickSwitch<cr>";
+      options.desc = "Quick Switch";
+    }
+
+    {
+      mode = "n";
+      key = "<leader>on";
+      action = "<cmd>ObsidianNew<cr>";
+      options.desc = "New Blank Note";
+    }
+
+    {
+      mode = "n";
+      key = "<leader>of";
+      action = "<cmd>ObsidianSearch<cr>";
+      options.desc = "Search";
+    }
+
+    {
+      mode = "n";
+      key = "<leader>oi";
+      action = "<cmd>ObsidianPasteImg<cr>";
+      options.desc = "Paste Image";
+    }
+
     # ----- Tabs -----
     {
       mode = "n";
