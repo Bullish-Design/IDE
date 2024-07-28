@@ -1,6 +1,12 @@
 {
   plugins.neogit = {
     enable = true;
+    settings = {
+      commit_popup = {
+        kind = "floating";
+      };
+      integrations.diffview = true;
+    };
   };
   keymaps = [
     {
