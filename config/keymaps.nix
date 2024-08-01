@@ -191,8 +191,8 @@
       mode = "n";
       key = "<leader><Tab><Tab>`";
       # action = "<M-H>";
-      # action = "<cmd>lua vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<M-H>", true, false, true), 'n', false)<cr>";
-      action = ":call nvim_feedkeys(nvim_replace_termcodes("<M-H>", true, false, true), 'n', false)<cr>";
+      action.__raw = "<cmd>lua vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<M-H>", true, false, true), 'n', false)<cr>";
+      # action = ":call nvim_feedkeys(nvim_replace_termcodes("<M-H>", true, false, true), 'n', false)<cr>";
       options.desc = "Previous Window";
     }
 
