@@ -33,7 +33,7 @@
 
     {
       mode = "n";
-      key = "<S-Tab>";
+      key = "<C-Tab>";
       action = "<cmd>BufferLineCyclePrev<cr>";
       options = {
         desc = "Cycle to previous buffer";
@@ -114,14 +114,14 @@
 
     {
       mode = "n";
-      key = "<leader><Tab>bh";
+      key = "<leader><Tab><Space>h";
       action = "<cmd>BufferLineCyclePrev<cr>";
       options.desc = "Previous Buffer";
     }
 
     {
       mode = "n";
-      key = "<leader><Tab>bl";
+      key = "<leader><Tab><Space>l";
       action = "<cmd>BufferLineCycleNext<cr>";
       options.desc = "Next Buffer";
     }
