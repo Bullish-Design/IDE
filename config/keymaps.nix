@@ -193,7 +193,7 @@
       # action = "<M-H>";
       # action = "<cmd>lua vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<M-H>", true, false, true), 'n', false)<cr>";
       action = ":lua vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<M-H>", true, false, true), 'n', false)<cr>";
-      ooptions.desc = "Previous Window";
+      options.desc = "Previous Window";
     }
 
     {
