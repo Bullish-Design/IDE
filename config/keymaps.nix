@@ -98,7 +98,7 @@
 
     {
       mode = "n";
-      key = "<leader><Tab>b";
+      key = "<leader><Tab><C>";
       action = "+buffers";
       options.desc = "Buffers";
     }
