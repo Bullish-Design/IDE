@@ -182,43 +182,45 @@
     {
       mode = "n";
       key = "<leader><Tab><Tab><Tab>";
-      action = "<M-L>";
-      options.desc = "Next Tmux Window";
+      # action = "<M-L>";
+      action = "<cmd>lua vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<M-L>", true, false, true), 'n', false)";
+      options.desc = "Next Window";
     }
 
     {
       mode = "n";
       key = "<leader><Tab><Tab>`";
-      action = "<M-H>";
-      options.desc = "Previous Tmux Window";
+      # action = "<M-H>";
+      action = "<cmd>lua vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<M-H>", true, false, true), 'n', false)";
+      ooptions.desc = "Previous Window";
     }
 
     {
       mode = "n";
       key = "<leader><Tab><Tab>h";
       action = "<C-h>";
-      options.desc = "Tmux Pane Left";
+      options.desc = " Pane Left";
     }
 
     {
       mode = "n";
       key = "<leader><Tab><Tab>l";
       action = "<C-l>";
-      options.desc = "Tmux Pane Right";
+      options.desc = " Pane Right";
     }
 
     {
       mode = "n";
       key = "<leader><Tab><Tab>j";
       action = "<C-j>";
-      options.desc = "Tmux Pane Down";
+      options.desc = " Pane Down";
     }
 
     {
       mode = "n";
       key = "<leader><Tab><Tab>k";
       action = "<C-k>";
-      options.desc = "Tmux Pane Up";
+      options.desc = " Pane Up";
     }
 
     # # ----- Tabs -----
