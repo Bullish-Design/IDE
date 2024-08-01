@@ -7,7 +7,7 @@
       keymap = {
         jumpPrev = "[[";
         jumpNext = "]]";
-        accept = "<CR>";
+        accept = "<Tab>";
         refresh = "gr";
         open = "<M-CR>";
       };
@@ -17,7 +17,7 @@
       };
     };
     suggestion = {
-      enabled = false;
+      enabled = true;
       autoTrigger = true;
       debounce = 75;
       keymap = {
@@ -31,7 +31,7 @@
     };
     filetypes = {
       yaml = false;
-      markdown = false;
+      markdown = true;
       help = false;
       gitcommit = false;
       gitrebase = false;
