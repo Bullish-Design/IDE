@@ -193,36 +193,37 @@
       mode = "n";
       key = "<leader><Tab><Tab>`";
       # action = "<M-H>";
-      action.__raw = "(function () return (vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<M-H>', true, false, true), 'n', false)) end)";
+      # action.__raw = "(function () return (vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<M-H>', true, false, true), 'n', false)) end)";
       # action = ":call nvim_feedkeys(nvim_replace_termcodes("<M-H>", true, false, true), 'n', false)<cr>";
+      action = "<cmd>! tmux previous-window<cr>";
       options.desc = "Previous Window";
     }
 
     {
       mode = "n";
       key = "<leader><Tab><Tab>h";
-      action = "<C-h>";
+      action = "<cmd>! tmux select-pane -L<cr>";
       options.desc = " Pane Left";
     }
 
     {
       mode = "n";
       key = "<leader><Tab><Tab>l";
-      action = "<C-l>";
+      action = "<cmd>! tmux select-pane -R<cr>";
       options.desc = " Pane Right";
     }
 
     {
       mode = "n";
       key = "<leader><Tab><Tab>j";
-      action = "<C-j>";
+      action = "<cmd>! tmux select-pane -D<cr>";
       options.desc = " Pane Down";
     }
 
     {
       mode = "n";
       key = "<leader><Tab><Tab>k";
-      action = "<C-k>";
+      action = "<cmd>! tmux select-pane -U<cr>";
       options.desc = " Pane Up";
     }
 
