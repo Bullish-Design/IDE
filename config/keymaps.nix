@@ -182,8 +182,8 @@
     {
       mode = "n";
       key = "<leader><Tab><Tab><Tab>";
-      action = "<M-L>";
-      # action = "<cmd>:call nvim_feedkeys(nvim_replace_termcodes("<M-L>", true, false, true), 'n', false)<cr>";
+      # action = "<M-L>";
+      action = "<cmd>vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<M-L>', true, false, true), 'n', false)<cr>";
       options.desc = "Next Window";
     }
 
