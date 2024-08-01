@@ -203,28 +203,41 @@
       mode = "n";
       key = "<leader><Tab><Tab>h";
       action = "<cmd>! tmux select-pane -L<cr>";
-      options.desc = " Pane Left";
+      options = {
+        silent = true;
+        desc = " Pane Left";
+      };
     }
 
     {
       mode = "n";
       key = "<leader><Tab><Tab>l";
       action = "<cmd>! tmux select-pane -R<cr>";
-      options.desc = " Pane Right";
+      options = {
+        silent = true;
+        desc = " Pane Right";
+      };
     }
 
     {
       mode = "n";
       key = "<leader><Tab><Tab>j";
       action = "<cmd>! tmux select-pane -D<cr>";
-      options.desc = " Pane Down";
+      options = {
+        silent = true;
+        desc = " Pane Down";
+      };
     }
 
     {
       mode = "n";
       key = "<leader><Tab><Tab>k";
       action = "<cmd>! tmux select-pane -U<cr>";
-      options.desc = " Pane Up";
+      # options.desc = " Pane Up";
+      options = {
+        silent = true;
+        desc = " Pane Up";
+      };
     }
 
     # # ----- Tabs -----
