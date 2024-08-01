@@ -183,7 +183,7 @@
       mode = "n";
       key = "<leader><Tab><Tab><Tab>";
       # action = "<M-L>";
-      action = "<cmd>lua vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<M-L>", true, false, true), 'n', false)";
+      action = "<cmd>lua vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<M-L>", true, false, true), 'n', false)<cr>";
       options.desc = "Next Window";
     }
 
@@ -191,7 +191,7 @@
       mode = "n";
       key = "<leader><Tab><Tab>`";
       # action = "<M-H>";
-      action = "<cmd>lua vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<M-H>", true, false, true), 'n', false)";
+      action = "<cmd>lua vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<M-H>", true, false, true), 'n', false)<cr>";
       ooptions.desc = "Previous Window";
     }
 
