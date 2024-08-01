@@ -183,7 +183,9 @@
       mode = "n";
       key = "<leader><Tab><Tab><Tab>";
       # action = "<M-L>";
-      action = "<cmd>lua vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<M-L>', true, false, true), 'n', false)<cr>";
+      # action = "<cmd>lua vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<M-L>', true, false, true), 'n', false)<cr>";
+
+      action = "<cmd>! tmux next-window<cr>";
       options.desc = "Next Window";
     }
 
