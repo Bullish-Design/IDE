@@ -97,6 +97,20 @@
     }
 
     {
+      mode = "n";
+      key = "<leader><Tab>b";
+      action = "+buffers";
+      options.desc = "Buffers";
+    }
+
+    {
+      mode = "n";
+      key = "<leader><Tab><Tab>";
+      action = "+tmux";
+      options.desc = "Tmux";
+    }
+
+    {
       mode = ["n" "v"];
       key = "<leader>d";
       action = "+debug";
@@ -161,66 +175,112 @@
       options.desc = "Paste Image";
     }
 
-    # ----- Tabs -----
+
+
+  # ----- Tmux -----
+
     {
       mode = "n";
-      key = "<leader><tab>l";
-      action = "<cmd>tablast<cr>";
-      options = {
-        silent = true;
-        desc = "Last tab";
-      };
+      key = "<leader><Tab><Tab><Tab>";
+      action = "<M-L>";
+      options.desc = "Next Tmux Window";
     }
 
     {
       mode = "n";
-      key = "<leader><tab>f";
-      action = "<cmd>tabfirst<cr>";
-      options = {
-        silent = true;
-        desc = "First Tab";
-      };
+      key = "<leader><Tab><Tab>`";
+      action = "<M-H>";
+      options.desc = "Previous Tmux Window";
     }
 
     {
       mode = "n";
-      key = "<leader><tab><tab>";
-      action = "<cmd>tabnew<cr>";
-      options = {
-        silent = true;
-        desc = "New Tab";
-      };
+      key = "<leader><Tab><Tab>h";
+      action = "<C-h>";
+      options.desc = "Tmux Pane Left";
     }
 
     {
       mode = "n";
-      key = "<leader><tab>]";
-      action = "<cmd>tabnext<cr>";
-      options = {
-        silent = true;
-        desc = "Next Tab";
-      };
+      key = "<leader><Tab><Tab>l";
+      action = "<C-l>";
+      options.desc = "Tmux Pane Right";
     }
 
     {
       mode = "n";
-      key = "<leader><tab>d";
-      action = "<cmd>tabclose<cr>";
-      options = {
-        silent = true;
-        desc = "Close tab";
-      };
+      key = "<leader><Tab><Tab>j";
+      action = "<C-j>";
+      options.desc = "Tmux Pane Down";
     }
 
     {
       mode = "n";
-      key = "<leader><tab>[";
-      action = "<cmd>tabprevious<cr>";
-      options = {
-        silent = true;
-        desc = "Previous Tab";
-      };
+      key = "<leader><Tab><Tab>k";
+      action = "<C-k>";
+      options.desc = "Tmux Pane Up";
     }
+
+    # # ----- Tabs -----
+    # {
+    #   mode = "n";
+    #   key = "<leader><tab>l";
+    #   action = "<cmd>tablast<cr>";
+    #   options = {
+    #     silent = true;
+    #     desc = "Last tab";
+    #   };
+    # }
+
+    # {
+    #   mode = "n";
+    #   key = "<leader><tab>f";
+    #   action = "<cmd>tabfirst<cr>";
+    #   options = {
+    #     silent = true;
+    #     desc = "First Tab";
+    #   };
+    # }
+
+    # {
+    #   mode = "n";
+    #   key = "<leader><tab><tab>";
+    #   action = "<cmd>tabnew<cr>";
+    #   options = {
+    #     silent = true;
+    #     desc = "New Tab";
+    #   };
+    # }
+
+    # {
+    #   mode = "n";
+    #   key = "<leader><tab>]";
+    #   action = "<cmd>tabnext<cr>";
+    #   options = {
+    #     silent = true;
+    #     desc = "Next Tab";
+    #   };
+    # }
+
+    # {
+    #   mode = "n";
+    #   key = "<leader><tab>d";
+    #   action = "<cmd>tabclose<cr>";
+    #   options = {
+    #     silent = true;
+    #     desc = "Close tab";
+    #   };
+    # }
+
+    # {
+    #   mode = "n";
+    #   key = "<leader><tab>[";
+    #   action = "<cmd>tabprevious<cr>";
+    #   options = {
+    #     silent = true;
+    #     desc = "Previous Tab";
+    #   };
+    # }
 
     # ----- Windows -----
     {

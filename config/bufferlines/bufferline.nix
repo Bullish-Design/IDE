@@ -85,31 +85,45 @@
     #   };
     # }
 
+    # {
+    #   mode = "n";
+    #   key = "<leader>br";
+    #   action = "<cmd>BufferLineCloseRight<cr>";
+    #   options = {
+    #     desc = "Delete buffers to the right";
+    #   };
+    # }
+
+    # {
+    #   mode = "n";
+    #   key = "<leader>bl";
+    #   action = "<cmd>BufferLineCloseLeft<cr>";
+    #   options = {
+    #     desc = "Delete buffers to the left";
+    #   };
+    # }
+
+    # {
+    #   mode = "n";
+    #   key = "<leader>bo";
+    #   action = "<cmd>BufferLineCloseOthers<cr>";
+    #   options = {
+    #     desc = "Delete other buffers";
+    #   };
+    # }
+
     {
       mode = "n";
-      key = "<leader>br";
-      action = "<cmd>BufferLineCloseRight<cr>";
-      options = {
-        desc = "Delete buffers to the right";
-      };
+      key = "<leader><Tab>bh";
+      action = "<cmd>BufferLineCyclePrev<cr>";
+      options.desc = "Previous Buffer";
     }
 
     {
       mode = "n";
-      key = "<leader>bl";
-      action = "<cmd>BufferLineCloseLeft<cr>";
-      options = {
-        desc = "Delete buffers to the left";
-      };
-    }
-
-    {
-      mode = "n";
-      key = "<leader>bo";
-      action = "<cmd>BufferLineCloseOthers<cr>";
-      options = {
-        desc = "Delete other buffers";
-      };
+      key = "<leader><Tab>bl";
+      action = "<cmd>BufferLineCycleNext<cr>";
+      options.desc = "Next Buffer";
     }
 
     {
