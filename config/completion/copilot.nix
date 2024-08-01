@@ -30,6 +30,9 @@
       };
     };
     filetypes = {
+      python = true;
+      nix = true;
+      lua = true;
       yaml = false;
       markdown = true;
       help = false;
@@ -38,7 +41,7 @@
       hgcommit = false;
       svn = false;
       cvs = false;
-      "." = false;
+      # "." = false;
     };
     copilotNodeCommand = "node"; # Node.js version must be > 18.x
     serverOptsOverrides = {};
