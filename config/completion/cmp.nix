@@ -33,8 +33,8 @@
         ];
 
         window = {
-          completion = { border = "solid"; };
-          documentation = { border = "solid"; };
+          completion = { border = [ "╔" "═" "╗" "║" "╝" "═" "╚" "║" ]; };
+          documentation = { border = [ "╔" "═" "╗" "║" "╝" "═" "╚" "║" ]; };
         };
 
         mapping = {
