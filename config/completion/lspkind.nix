@@ -4,9 +4,9 @@
     # symbolMap = {
     #   Copilot = "";
     # };
-    extraOptions = {
-      maxwidth = 75;
-      ellipsis_char = "...";
-    };
+    # extraOptions = {
+    #   maxwidth = 75;
+    #   ellipsis_char = "...";
+    # };
   };
 }
