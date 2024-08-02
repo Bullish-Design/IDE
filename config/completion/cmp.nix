@@ -33,7 +33,8 @@
         ];
 
         window = {
-          completion = { border = [ "╔" "═" "╗" "║" "╝" "═" "╚" "║" ]; };
+          # completion = { border = [ "╔" "═" "╗" "║" "╝" "═" "╚" "║" ]; }; 
+          completion = { border = [ "╭" "─" "╮" "│" "╯" "─" "╰" "│" ]; }; 
           documentation = { border = [ "╔" "═" "╗" "║" "╝" "═" "╚" "║" ]; };
         };
 
