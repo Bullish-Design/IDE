@@ -7,7 +7,11 @@
   config = {
     opts = {
       # Enable clipboard support
-      clipboard.register = "unnamedplus";
+      clipboard = {
+        register = "unnamedplus";
+        providers.xclip.enable = true;
+      };
+
       
       # Enable relative line numbers
       number = true;
