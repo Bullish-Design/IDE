@@ -4,9 +4,11 @@
   config,
   ...
 }: {
-  clipboard.register = "unnamed";
   config = {
     opts = {
+      # Enable clipboard support
+      clipboard.register = "unnamed";
+      
       # Enable relative line numbers
       number = true;
       relativenumber = false; # **CHANGED** 
