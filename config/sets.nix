@@ -4,6 +4,7 @@
   config,
   ...
 }: {
+  clipboard.register = "unnamed";
   config = {
     opts = {
       # Enable relative line numbers
