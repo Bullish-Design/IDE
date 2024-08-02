@@ -1,7 +1,7 @@
 {
   imports = [
     ./clue.nix
-    ./completion.nix
+    # ./completion.nix
     ./files.nix
     #./pick.nix
     #./starter.nix
