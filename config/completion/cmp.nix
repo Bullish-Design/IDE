@@ -4,7 +4,7 @@
     cmp = {
       enable = true;
       settings = {
-        autoEnableSources = true;
+        autoEnableSources = false;
         experimental = { ghost_text = true; };
         performance = {
           debounce = 60;
