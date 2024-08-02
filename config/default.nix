@@ -38,7 +38,7 @@
     ./lsp/lspsaga.nix
     ./lsp/trouble.nix
 
-    ./none-ls/none-ls.nix # Currently not enabled, but keeping in
+    # ./none-ls/none-ls.nix # Currently not enabled, but keeping in
 
     ./obsidian/default.nix
 
