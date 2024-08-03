@@ -33,7 +33,7 @@
 
     {
       mode = "n";
-      key = "<C>-<Tab>";
+      key = "<C-<Tab>>";
       action = "<cmd>BufferLineCyclePrev<cr>";
       options = {
         desc = "Cycle to previous buffer";

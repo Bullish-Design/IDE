@@ -568,39 +568,39 @@
 
     # ----- Copy stuff to system clipboard with <leader> + y or just y to have it just in vim -----
     {
-      mode = ["n" "v"];
-      key = "<leader>y";
+      mode = ["n" "v" "i"];
+      key = "<C-c>";
       action = "\"+y";
       options = {
-        desc = "Copy to system clipboard";
+        # desc = "Copy to system clipboard";
       };
     }
 
     {
-      mode = ["n" "v"];
-      key = "<leader>Y";
+      mode = ["n" "v" "i"];
+      key = "<C-C>";
       action = "\"+Y";
       options = {
-        desc = "Copy to system clipboard";
+        # desc = "Copy to system clipboard";
       };
     }
 
     # ----- Delete to void register -----
-    {
-      mode = ["n" "v"];
-      key = "<leader>D";
-      action = "\"_d";
-      options = {
-        desc = "Delete to void register";
-      };
-    }
+    # {
+    #   mode = ["n" "v"];
+    #   key = "<leader>D";
+    #   action = "\"_d";
+    #   options = {
+    #     desc = "Delete to void register";
+    #   };
+    # }
 
-    # <C-c> instead of pressing esc just because
-    {
-      mode = "i";
-      key = "<C-c>";
-      action = "<Esc>";
-    }
+    # # <C-c> instead of pressing esc just because
+    # {
+    #   mode = "i";
+    #   key = "<C-c>";
+    #   action = "<Esc>";
+    # }
 
     # {
     #   mode = "n";
