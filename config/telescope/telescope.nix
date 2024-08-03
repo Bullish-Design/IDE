@@ -30,8 +30,15 @@
             };
           };
         };
+        file_ignore_patterns = [
+            "^.git/"
+          ];
       };
     };
+
+    
+
+
     keymaps = {
       "<leader><space>" = {
         action = "find_files";
