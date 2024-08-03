@@ -2,7 +2,7 @@
   plugins = {
     bufferline = {
       enable = true;
-      separatorStyle = "padded_slant"; # “slant”, “padded_slant”, “slope”, “padded_slope”, “thick”, “thin”
+      separatorStyle = "slant"; # “slant”, “padded_slant”, “slope”, “padded_slope”, “thick”, “thin”
       offsets = [
         {
           filetype = "neo-tree";
@@ -33,7 +33,7 @@
 
     {
       mode = "n";
-      key = "<C-Tab>";
+      key = "<C>-<Tab>";
       action = "<cmd>BufferLineCyclePrev<cr>";
       options = {
         desc = "Cycle to previous buffer";
@@ -60,21 +60,21 @@
 
     {
       mode = "n";
-      key = "<leader>bd";
+      key = "<leader><Tab><Space>d";
       action = "<cmd>bdelete<cr>";
       options = {
         desc = "Delete buffer";
       };
     }
 
-    {
-      mode = "n";
-      key = "<leader>bb";
-      action = "<cmd>e #<cr>";
-      options = {
-        desc = "Switch to Other Buffer";
-      };
-    }
+    # {
+    #   mode = "n";
+    #   key = "<leader>bb";
+    #   action = "<cmd>e #<cr>";
+    #   options = {
+    #     desc = "Switch to Other Buffer";
+    #   };
+    # }
 
     # {
     #   mode = "n";
@@ -128,7 +128,7 @@
 
     {
       mode = "n";
-      key = "<leader>bp";
+      key = "<leader><Tab><Space>p";
       action = "<cmd>BufferLineTogglePin<cr>";
       options = {
         desc = "Toggle pin";
@@ -137,7 +137,7 @@
 
     {
       mode = "n";
-      key = "<leader>bP";
+      key = "<leader><Tab><Space>P";
       action = "<Cmd>BufferLineGroupClose ungrouped<CR>";
       options = {
         desc = "Delete non-pinned buffers";

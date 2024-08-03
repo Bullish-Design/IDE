@@ -602,14 +602,14 @@
       action = "<Esc>";
     }
 
-    {
-      mode = "n";
-      key = "<C-f>";
-      action = "!tmux new tmux-sessionizer<CR>";
-      options = {
-        desc = "Switch between projects";
-      };
-    }
+    # {
+    #   mode = "n";
+    #   key = "<C-f>";
+    #   action = "!tmux new tmux-sessionizer<CR>";
+    #   options = {
+    #     desc = "Switch between projects";
+    #   };
+    # }
   ];
   extraConfigLua = ''
     local notify = require("notify")
