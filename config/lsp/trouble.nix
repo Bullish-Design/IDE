@@ -11,6 +11,7 @@
       mode = "n";
       key = "<leader>x";
       action = "+diagnostics/quickfix";
+      options.desc = "Diagnostics (Trouble)";
     }
     {
       mode = "n";
