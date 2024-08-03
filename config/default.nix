@@ -62,7 +62,7 @@
     #./utils/neocord.nix # - Discord integration of some sort
     #./utils/flash.nix # - Add on for fast search navigation? https://github.com/folke/flash.nvim
     #./utils/hardtime.nix # - neovim training tool? https://github.com/m4xshen/hardtime.nvim
-    ./utils/harpoon.nix # - quicker navigation of files? Investigate if v1 or v2 is being installed https://github.com/ThePrimeagen/harpoon/tree/harpoon2
+    #./utils/harpoon.nix # - quicker navigation of files? Investigate if v1 or v2 is being installed https://github.com/ThePrimeagen/harpoon/tree/harpoon2
     ./utils/illuminate.nix # - auto highlighting of other uses of a word https://github.com/RRethy/vim-illuminate
     ./utils/markdown-preview.nix # - 
     #./utils/mini.nix # - a collection of lua plugins (https://github.com/echasnovski/mini.nvim)
