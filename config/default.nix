@@ -68,7 +68,7 @@
     #./utils/mini.nix # - a collection of lua plugins (https://github.com/echasnovski/mini.nvim)
     #./utils/neodev.nix # - full IDE style support but just for lua? Also depreciated and recommending lazydev.nvim? (https://github.com/folke/neodev.nvim)
     #./utils/neotest.nix # - **TODO: CHECK PYTHON SUPPORT** Support for running tests within neovim (https://github.com/nvim-neotest/neotest)
-    # ./utils/neoclip.nix # - Clipboard manager 
+    ./utils/neoclip.nix # - Clipboard manager 
     #./utils/nvim-autopairs.nix # - Was disabled, due to ultimate autopair being used. 
     ./utils/nvim-colorizer.nix # - Colors
     # ./utils/nvim-surround.nix # - Selecting chunks. Investigate and practice (https://github.com/kylechui/nvim-surround)
