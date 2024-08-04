@@ -22,6 +22,7 @@
     ./git/diffview.nix
     #./git/lazygit.nix
     ./git/neogit.nix
+    ./git/octo.nix
 
     #./languages/nvim-jdtls.nix
     ./languages/nvim-lint.nix
