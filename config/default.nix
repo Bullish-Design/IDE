@@ -16,7 +16,8 @@
     ./completion/lspkind.nix
 
     ./dap/dap.nix
-
+    
+    # Git related
     #./filetrees/neo-tree.nix
     ./git/gitsigns.nix
     ./git/diffview.nix
