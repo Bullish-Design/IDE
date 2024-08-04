@@ -17,7 +17,7 @@
 
     ./dap/dap.nix
     
-    # Git related
+    # Git related - testing octo
     #./filetrees/neo-tree.nix
     ./git/gitsigns.nix
     ./git/diffview.nix
