@@ -25,36 +25,36 @@
           };
         };
         nil-ls = {enable = true;};
-        tsserver = {
-          enable = false;
-          filetypes = ["javascript" "javascriptreact" "typescript" "typescriptreact"];
-          extraOptions = {
-            settings = {
-              javascript = {
-                inlayHints = {
-                  includeInlayEnumMemberValueHints = true;
-                  includeInlayFunctionLikeReturnTypeHints = true;
-                  includeInlayFunctionParameterTypeHints = true;
-                  includeInlayParameterNameHints = "all";
-                  includeInlayParameterNameHintsWhenArgumentMatchesName = true;
-                  includeInlayPropertyDeclarationTypeHints = true;
-                  includeInlayVariableTypeHints = true;
-                };
-              };
-              typescript = {
-                inlayHints = {
-                  includeInlayEnumMemberValueHints = true;
-                  includeInlayFunctionLikeReturnTypeHints = true;
-                  includeInlayFunctionParameterTypeHints = true;
-                  includeInlayParameterNameHints = "all";
-                  includeInlayParameterNameHintsWhenArgumentMatchesName = true;
-                  includeInlayPropertyDeclarationTypeHints = true;
-                  includeInlayVariableTypeHints = true;
-                };
-              };
-            };
-          };
-        };
+        # tsserver = {
+        #   enable = false;
+        #   filetypes = ["javascript" "javascriptreact" "typescript" "typescriptreact"];
+        #   extraOptions = {
+        #     settings = {
+        #       javascript = {
+        #         inlayHints = {
+        #           includeInlayEnumMemberValueHints = true;
+        #           includeInlayFunctionLikeReturnTypeHints = true;
+        #           includeInlayFunctionParameterTypeHints = true;
+        #           includeInlayParameterNameHints = "all";
+        #           includeInlayParameterNameHintsWhenArgumentMatchesName = true;
+        #           includeInlayPropertyDeclarationTypeHints = true;
+        #           includeInlayVariableTypeHints = true;
+        #         };
+        #       };
+        #       typescript = {
+        #         inlayHints = {
+        #           includeInlayEnumMemberValueHints = true;
+        #           includeInlayFunctionLikeReturnTypeHints = true;
+        #           includeInlayFunctionParameterTypeHints = true;
+        #           includeInlayParameterNameHints = "all";
+        #           includeInlayParameterNameHintsWhenArgumentMatchesName = true;
+        #           includeInlayPropertyDeclarationTypeHints = true;
+        #           includeInlayVariableTypeHints = true;
+        #         };
+        #       };
+        #     };
+        #   };
+        # };
         eslint = {enable = true;};
         pyright = {enable = true;};
         ruff-lsp = {enable = true;};

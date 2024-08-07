@@ -31,7 +31,12 @@
       };
       # bracketed.__empty = null;
       bufremove = {};
-      comment = {};
+      comment = { 
+        mappings = {
+          comment_line = "gcc";
+          textobject = "gc";
+        };
+      };
       # cursorword.__empty = null;
       diff.view = {
         signs = {
