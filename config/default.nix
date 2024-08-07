@@ -38,7 +38,7 @@
     ./lsp/fidget.nix
     ./lsp/lsp.nix
     ./lsp/lspsaga.nix
-    # ./lsp/trouble.nix # Might be causing annoying messages in python files? Almost "overchecking", without proper context of file or project
+    ./lsp/trouble.nix # Might be causing annoying messages in python files? Almost "overchecking", without proper context of file or project
 
     # ./none-ls/none-ls.nix # Currently not enabled, but keeping in
 
