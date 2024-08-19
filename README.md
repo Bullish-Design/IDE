@@ -36,11 +36,12 @@
 
 </h3>
 
+# NOTE:
+This is a personal variant of the Neve Nixvim project. While it is daily driven, there are many hacks, issues, and workarounds. Please refer to the original project for any information or reference.
+
 ## What's Neve??
 
 Neve (snow in portuguese) is a meticulously crafted custom configuration for Nixvim, designed to revolutionize your development workflow and provide an unparalleled coding experience. This configuration is the culmination of expertise and passion, aiming to provide sane defaults.
-
-NOTE: This is a personal variant of the Neve Nixvim project. While it is daily driven, there are many hacks, issues, and workarounds. Please refer to the original project for any information or reference.
 
 ## Features
 
