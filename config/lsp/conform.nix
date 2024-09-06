@@ -10,15 +10,15 @@
       typescript = [["prettierd" "prettier"]];
       typescriptreact = [["prettierd" "prettier"]];
       java = ["google-java-format"];
-      python = [["ruff_format"]]; # "black"]];
+      python = ["ruff_format"]; # "black"]];
       lua = ["stylua"];
       nix = ["alejandra"];
       markdown = [["prettierd" "prettier"]];
       rust = ["rustfmt"];
     };
-    default_format_opts = {
-      line_length = 120;
-    };
+    #default_format_opts = {
+    #  line_length = 120;
+    #};
   };
 
   keymaps = [
