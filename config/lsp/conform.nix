@@ -16,7 +16,7 @@
       markdown = [["prettierd" "prettier"]];
       rust = ["rustfmt"];
     };
-    settings.default_format_opts = {
+    default_format_opts = {
       line_length = 120;
     };
   };
