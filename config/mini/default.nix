@@ -33,8 +33,10 @@
       bufremove = {};
       comment = { 
         mappings = {
-          comment_line = "gcc";
-          textobject = "gc";
+          comment = "<leader>/";
+          comment_line = "<leader>/";
+          comment_visual = "<leader>/";
+          textobject = "<leader>/";
         };
       };
       # cursorword.__empty = null;
