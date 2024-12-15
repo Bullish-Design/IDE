@@ -121,6 +121,10 @@
 
       laststatus = 3; # (https://neovim.io/doc/user/options.html#'laststatus')
     };
+    extraPython3Packages = p:
+        with p; [
+          pynvim
+          ];
 
     extraConfigLua = ''
       local opt = vim.opt
