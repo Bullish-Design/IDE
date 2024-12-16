@@ -127,7 +127,8 @@
           ];
 # ${config.users.users.username.home}
     extraConfigLua = ''
-      
+      vim.o.runtimepath = vim.o.runtimepath .. ',' .. os.getenv("HOME") .. '/.config/nvim'
+
       local opt = vim.opt
       local g = vim.g
       local o = vim.o
@@ -155,8 +156,7 @@
         -- o.guifont = "Liga SFMono Nerd Font:b:h15"
       end
 
-      vim.o.runtimepath = vim.o.runtimepath .. ',' .. os.getenv("HOME") .. '/.config/nvim'
-
+      
     '';
   };
 }
