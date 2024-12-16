@@ -18,6 +18,8 @@
     self,
     nixpkgs,
     nixvim,
+    plugin-nui, 
+    plugin-nui-components,
     flake-utils,
     ...
   } @ inputs: let
