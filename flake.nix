@@ -4,6 +4,14 @@
   inputs = {
     nixvim.url = "github:nix-community/nixvim";
     flake-utils.url = "github:numtide/flake-utils";
+    plugin-nui-components = {
+      url = "github:grapp-dev/nui-components.nvim";
+      flake = false;
+    };
+    plugin-nui = {
+      url = "github:MunifTanjim/nui.nvim";
+      flake = false;
+    };
   };
 
   outputs = {
