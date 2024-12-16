@@ -35,6 +35,7 @@
         # You can use `extraSpecialArgs` to pass additional arguments to your module files
         extraSpecialArgs = {
           inherit self;
+          inherit inputs;
         };
       };
     in {
