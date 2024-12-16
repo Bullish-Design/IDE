@@ -125,8 +125,9 @@
         with p; [
           pynvim
           ];
-
+# ${config.users.users.username.home}
     extraConfigLua = ''
+      
       local opt = vim.opt
       local g = vim.g
       local o = vim.o
@@ -153,6 +154,9 @@
         -- o.guifont = "BlexMono Nerd Font Mono:h14:Medium:i"
         -- o.guifont = "Liga SFMono Nerd Font:b:h15"
       end
+
+      vim.o.runtimepath = vim.o.runtimepath .. ',' .. os.getenv("HOME") .. '/.config/nvim'
+
     '';
   };
 }
