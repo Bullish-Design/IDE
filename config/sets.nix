@@ -127,7 +127,8 @@
           ];
 # ${config.users.users.username.home}
     extraConfigLua = ''
-      vim.o.runtimepath = vim.o.runtimepath .. ',' .. os.getenv("HOME") .. '/.config/nvim'
+      vim.o.runtimepath = vim.o.runtimepath .. ',' .. os.getenv("HOME") .. '/.config/nvim'.. ',' .. os.getenv("HOME") .. '/Documents/Projects/PyNui'
+
 
       local opt = vim.opt
       local g = vim.g
