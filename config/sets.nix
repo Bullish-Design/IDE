@@ -135,7 +135,13 @@
       -- Add paths to runtime
       vim.o.runtimepath = vim.o.runtimepath .. ',' .. os.getenv("HOME") .. '/.config/nvim'.. ',' .. os.getenv("HOME") .. '/Documents/Projects/PyNui/pynui' 
       
-      
+      -- Set Python 3 host program
+      local python_path = vim.fn.exepath("python3")
+      if python_path ~= "" then
+        vim.g.python3_host_prog = python_path
+        vim.g.python_host_prog = python_path
+      end
+
 
       local opt = vim.opt
       local g = vim.g
