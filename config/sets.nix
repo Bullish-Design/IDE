@@ -132,6 +132,7 @@
       
       -- Set Python 3 host program
       vim.g.python3_host_prog = os.getenv("HOME") .. '/.venvs/neovim/bin/python'
+      vim.g.python_host_prog = os.getenv("HOME") .. '/.venvs/neovim/bin/python'
 
 
       local opt = vim.opt
