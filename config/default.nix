@@ -87,6 +87,6 @@
     ./utils/vim-be-good.nix # - Vim practice?
     #./utils/wakatime.nix # - Time tracking
     #./utils/whichkey.nix # - 
-    ./utils/wilder.nix # - "A more adventurous wildmenu" - What's a wildmenu??? (https://github.com/gelguy/wilder.nvim)
+    #./utils/wilder.nix # - "A more adventurous wildmenu" - What's a wildmenu??? (https://github.com/gelguy/wilder.nvim)
   ];
 }
