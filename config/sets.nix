@@ -121,10 +121,10 @@
 
       laststatus = 3; # (https://neovim.io/doc/user/options.html#'laststatus')
     };
-    extraPython3Packages = p:
-        with p; [
-          pynvim
-          ];
+    #extraPython3Packages = p:
+    #    with p; [
+    #      pynvim
+    #      ];
 # ${config.users.users.username.home}
     extraConfigLua = ''
       -- Add paths to runtime
