@@ -140,7 +140,8 @@
 # ${config.users.users.username.home}
     extraConfigLua = ''
       ---- Add paths to runtime
-      --vim.o.runtimepath = vim.o.runtimepath .. ',' .. os.getenv("HOME") .. '/.config/nvim' --.. ',' .. os.getenv("HOME") .. '/Documents/Projects/PyNui/pynui' 
+      --vim.o.runtimepath = vim.o.runtimepath .. ',' .. os.getenv("HOME") .. '/.config/nvim' 
+      --.. ',' .. os.getenv("HOME") .. '/Documents/Projects/PyNui/pynui' 
       
       -- Set Python 3 host program
       local python_path = vim.fn.exepath("python3")
@@ -150,7 +151,10 @@
       end
 
       -- Add paths to runtime
-      vim.o.runtimepath = vim.o.runtimepath .. ',' .. python_path    --.. os.getenv("HOME") .. '/.config/nvim' --.. ',' .. os.getenv("HOME") .. '/Documents/Projects/PyNui/pynui' 
+      vim.o.runtimepath = vim.o.runtimepath .. ',' .. vim.fn.getcwd()
+      --python_path    
+      --.. os.getenv("HOME") .. '/.config/nvim' 
+      --.. ',' .. os.getenv("HOME") .. '/Documents/Projects/PyNui/pynui' 
       
 
 
