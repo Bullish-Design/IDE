@@ -121,10 +121,10 @@
 
       laststatus = 3; # (https://neovim.io/doc/user/options.html#'laststatus')
     };
-    #extraPython3Packages = p:
-    #    with p; [
-    #      pynvim
-    #      ];
+    extraPython3Packages = p:
+        with p; [
+          pynvim
+          ];
 
     #-- Set Python 3 host program
     #  vim.g.python3_host_prog = os.getenv("HOME") .. '/.venvs/neovim/bin/python'
