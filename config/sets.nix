@@ -147,7 +147,7 @@
       -- local python_path = vim.fn.exepath("python3")
       -- if python_path ~= "" then
 
-      vim.g.python3_host_prog = os.getenv("HOME") .. '/.venvs/neovim/bin/python'
+      -- vim.g.python3_host_prog = os.getenv("HOME") .. '/.venvs/neovim/bin/python'
       -- vim.g.python_host_prog = os.getenv("HOME") .. '/.venvs/neovim/bin/python'
 
       -- end
