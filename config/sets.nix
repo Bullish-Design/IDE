@@ -121,10 +121,10 @@
 
       laststatus = 3; # (https://neovim.io/doc/user/options.html#'laststatus')
     };
-    extraPython3Packages = p:
-        with p; [
-          pynvim
-          ];
+    #extraPython3Packages = p:
+    #    with p; [
+    #      pynvim
+    #      ];
 
     #-- Set Python 3 host program
     #  vim.g.python3_host_prog = os.getenv("HOME") .. '/.venvs/neovim/bin/python'
@@ -140,7 +140,7 @@
 # ${config.users.users.username.home}
     extraConfigLua = ''
       -- Add paths to runtime
-      vim.o.runtimepath = vim.o.runtimepath .. ',' .. os.getenv("HOME") .. '/.config/nvim'.. ',' .. os.getenv("HOME") .. '/Documents/Projects/PyNui/pynui' 
+      vim.o.runtimepath = vim.o.runtimepath .. ',' .. os.getenv("HOME") .. '/.config/nvim' --.. ',' .. os.getenv("HOME") .. '/Documents/Projects/PyNui/pynui' 
       
       -- Set Python 3 host program
       --local python_path = vim.fn.exepath("python3")
