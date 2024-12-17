@@ -130,6 +130,13 @@
     #  vim.g.python3_host_prog = os.getenv("HOME") .. '/.venvs/neovim/bin/python'
     #  vim.g.python_host_prog = os.getenv("HOME") .. '/.venvs/neovim/bin/python'
 
+    #-- Set Python 3 host program
+    #  local python_path = vim.fn.exepath("python3")
+    #  -- if python_path ~= "" then
+    #  vim.g.python3_host_prog = python_path
+    #  vim.g.python_host_prog = python_path
+    #  -- end
+
 # ${config.users.users.username.home}
     extraConfigLua = ''
       -- Add paths to runtime
@@ -137,10 +144,10 @@
       
       -- Set Python 3 host program
       local python_path = vim.fn.exepath("python3")
-      if python_path ~= "" then
-        vim.g.python3_host_prog = python_path
-        vim.g.python_host_prog = python_path
-      end
+      -- if python_path ~= "" then
+      vim.g.python3_host_prog = python_path
+      vim.g.python_host_prog = python_path
+      -- end
 
 
       local opt = vim.opt
