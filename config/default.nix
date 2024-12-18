@@ -27,6 +27,7 @@
 
     #./languages/nvim-jdtls.nix
     ./languages/nvim-lint.nix
+    ./languages/fennel.nix
     #./languages/typescript-tools-nvim.nix
     ./languages/treesitter/treesitter.nix
     ./languages/treesitter/treesitter-context.nix

@@ -7,6 +7,8 @@
       enable = true;
       capabilities = "offsetEncoding =  'utf-16'";
       servers = {
+        fennel_language_server = {enable = true;};
+        fennel_ls = {enable = true;};
         clangd = {enable = true;};
         lua-ls = {
           enable = true;

@@ -1,0 +1,5 @@
+{
+  plugins.conjure = {
+    enable = true;
+    };
+}
