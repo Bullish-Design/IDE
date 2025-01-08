@@ -12,6 +12,7 @@ windows:
       - shell_command:
           - tmux resizep -y 90%
           #- sleep 0.1
-          - nvim
+          - filelist-open "startup_files.txt" "IDE"
+
         focus: true
       - clear
