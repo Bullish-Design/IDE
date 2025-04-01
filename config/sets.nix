@@ -4,6 +4,13 @@
   config,
   ...
 }: {
+  autoCmd = [
+    {
+      event = ["BufRead" "BufNewFile"];
+      pattern = "*.mcpt";
+      command = "set filetype=python";
+    }
+  ];
   config = {
     opts = {
       # Enable clipboard support
