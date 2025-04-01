@@ -6,6 +6,14 @@
 }: {
   
   config = {
+    # Autocmds:
+    autoCmd = [
+      {
+        event = ["BufRead" "BufNewFile"];
+        pattern = "*.mcpt";
+        command = "set filetype=python";
+      }
+    ];
     opts = {
       # Enable clipboard support
       clipboard = {
@@ -14,14 +22,7 @@
         providers.wl-copy.enable = true;
       };
       
-      # Autocmds:
-      autoCmd = [
-        {
-          event = ["BufRead" "BufNewFile"];
-          pattern = "*.mcpt";
-          command = "set filetype=python";
-        }
-      ];
+      
       
       # Enable relative line numbers
       number = true;
