@@ -23,15 +23,15 @@
         };
       };
       # https://cmp.saghen.dev/modes/cmdline.html
-      cmdline = {
-        #completion.menu.auto_show = true;
-        keymap = {
-          "<Tab>" = [
-            "show"
-            "accept"
-          ];
-        };
-      };
+      #cmdline = {
+      #  #completion.menu.auto_show = true;
+      #  keymap = {
+      #    "<Tab>" = [
+      #      "show"
+      #      "accept"
+      #    ];
+      #  };
+      #};
       # https://cmp.saghen.dev/configuration/keymap#presets
       keymap = {
         preset = "super-tab";
