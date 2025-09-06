@@ -24,7 +24,7 @@
       };
       # https://cmp.saghen.dev/modes/cmdline.html
       cmdline = {
-        completion.menu.auto_show = true;
+        #completion.menu.auto_show = true;
         keymap = {
           "<Tab>" = [
             "show"
