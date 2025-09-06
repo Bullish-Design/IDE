@@ -4,8 +4,8 @@
     # package = pkgs.vimPlugins.codecompanion.nvim;
     settings = {
       strategies = {
-        chat.adapter = "anthropic";
-        inline.adapter = "anthropic";
+        chat.adapter = "openai";
+        inline.adapter = "openai";
       };
     };
   };
