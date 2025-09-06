@@ -3,6 +3,11 @@
   imports = [
     ./sets.nix
     ./keymaps.nix
+    
+    # AI tools, scripts, and workflow related:
+    ./ai/codecompanion.nix
+    ./ai/blink.nix
+
 
     ./bufferlines/bufferline.nix
 
@@ -70,24 +75,24 @@
     ./utils/markdown-preview.nix # - 
     #./utils/mini.nix # - a collection of lua plugins (https://github.com/echasnovski/mini.nvim)
     #./utils/neodev.nix # - full IDE style support but just for lua? Also depreciated and recommending lazydev.nvim? (https://github.com/folke/neodev.nvim)
-    #./utils/neotest.nix # - **TODO: CHECK PYTHON SUPPORT** Support for running tests within neovim (https://github.com/nvim-neotest/neotest)
+    ./utils/neotest.nix # - **TODO: CHECK PYTHON SUPPORT** Support for running tests within neovim (https://github.com/nvim-neotest/neotest)
     # ./utils/neoclip.nix # - Clipboard manager 
     #./utils/nvim-autopairs.nix # - Was disabled, due to ultimate autopair being used. 
     ./utils/nvim-colorizer.nix # - Colors
     # ./utils/nvim-surround.nix # - Selecting chunks. Investigate and practice (https://github.com/kylechui/nvim-surround)
     #./utils/oil.nix # - Edit filesystem like a neovim buffer? Investigate (https://github.com/stevearc/oil.nvim)
     ./utils/persistence.nix # - Session management (https://github.com/folke/persistence.nvim)
-    ./utils/plenary.nix # - A collection of Lua functions? Investigate. (https://github.com/nvim-lua/plenary.nvim)
+    ./utils/plenary.nix # - A collection of Lua functions. 
     ./utils/project-nvim.nix # - Project management. Investigate functionality. (https://github.com/ahmedkhalf/project.nvim)
-    #./utils/sidebar.nix # - 
+    #./utils/sidebar.nix # -Could be interesting for agent interaction/project background scripts status? 
     ./utils/tmux-navigator.nix # - 
     ./utils/todo-comments.nix # - 
     ./utils/toggleterm.nix # - 
     #./utils/ultimate-autopair.nix # - 
-    ./utils/undotree.nix # - 
+    ./utils/undotree.nix # -  
     ./utils/vim-be-good.nix # - Vim practice?
     #./utils/wakatime.nix # - Time tracking
     #./utils/whichkey.nix # - 
-    #./utils/wilder.nix # - "A more adventurous wildmenu" - What's a wildmenu??? (https://github.com/gelguy/wilder.nvim)
+    ./utils/wilder.nix # - "A more adventurous wildmenu" - What's a wildmenu??? (https://github.com/gelguy/wilder.nvim)
   ];
 }
