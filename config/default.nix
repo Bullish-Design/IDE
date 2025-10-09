@@ -5,7 +5,7 @@
     ./keymaps.nix
     
     # AI tools, scripts, and workflow related:
-    ./ai/codecompanion.nix
+    #./ai/codecompanion.nix
     #./ai/blink.nix
 
 
