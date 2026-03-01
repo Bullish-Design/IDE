@@ -11,20 +11,22 @@ check_api_key("OPENAI_API_KEY", "OpenAI")
 
 require("codecompanion").setup({
   adapters = {
-    anthropic = function()
-      return require("codecompanion.adapters").extend("anthropic", {
-        env = {
-          api_key = os.getenv("ANTHROPIC_API_KEY") or "",
-        },
-      })
-    end,
-    openai = function()
-      return require("codecompanion.adapters").extend("openai", {
-        env = {
-          api_key = os.getenv("OPENAI_API_KEY") or "",
-        },
-      })
-    end,
+    http = {
+      anthropic = function()
+        return require("codecompanion.adapters").extend("anthropic", {
+          env = {
+            api_key = os.getenv("ANTHROPIC_API_KEY") or "",
+          },
+        })
+      end,
+      openai = function()
+        return require("codecompanion.adapters").extend("openai", {
+          env = {
+            api_key = os.getenv("OPENAI_API_KEY") or "",
+          },
+        })
+      end,
+    },
   },
   display = {
     action_palette = {
@@ -45,8 +47,10 @@ require("codecompanion").setup({
     chat = "anthropic",
     inline = "openai",
   },
-  opts = {
-    log_level = "ERROR",
+  http = {
+    opts = {
+      log_level = "ERROR",
+    },
   },
 })
 

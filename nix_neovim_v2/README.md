@@ -78,7 +78,7 @@ This section guides you through testing all configuration features.
 
 ```bash
 cd /home/andrew/Documents/Projects/IDE/nix_neovim_v2
-nix flake develop
+nix develop
 ```
 
 This provides Neovim 0.11+, all LSP servers, formatters, linters, and test runners.

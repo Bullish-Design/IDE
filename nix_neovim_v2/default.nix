@@ -1,12 +1,13 @@
 # nix_neovim_v2/default.nix
+# Drop-in replacement for nvim system setup
 
 { pkgs, config, ... }:
 let
-  cmdName = "nvim2";
+  cmdName = "nv2";
   srcDir = "${config.home.homeDirectory}/.dotfiles/nix_neovim_v2";
-
+  
   allPlugins = import ./plugins.nix { inherit pkgs; };
-
+  
 in
 {
   home.packages = [

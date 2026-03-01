@@ -34,15 +34,20 @@ require("mini.sessions").setup({
 })
 
 -- Starter (dashboard)
-require("mini.starter").setup({
+local starter = require("mini.starter")
+local recent = starter.sections.recent_files(8, true)
+local builtin = starter.sections.builtin_actions()
+
+-- Ensure both are tables
+recent = (type(recent) == "table") and recent or {}
+builtin = (type(builtin) == "table") and builtin or {}
+
+starter.setup({
   header = table.concat(require("ui.header"), "\n"),
-  items = vim.list_extend(
-    require("mini.starter").sections.recent_files(8, true),
-    require("mini.starter").sections.builtin_actions()
-  ),
+  items = vim.list_extend(recent, builtin),
   content_hooks = {
-    require("mini.starter").gen_hook.adding_bullet("• "),
-    require("mini.starter").gen_hook.aligning("center", "center"),
+    starter.gen_hook.adding_bullet("• "),
+    starter.gen_hook.aligning("center", "center"),
   },
 })
 
@@ -80,7 +85,8 @@ vim.notify = require("mini.notify").make_notify()
 -- Open starter on empty launch
 vim.api.nvim_create_autocmd("VimEnter", {
   callback = function()
-    if vim.fn.argc() == 0 and vim.v.this_session == "" then
+    -- Only show starter if no file is being edited and no session is being restored
+    if vim.fn.argc() == 0 then
       require("mini.starter").open()
     end
   end,

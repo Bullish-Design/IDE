@@ -1,5 +1,5 @@
 { inputs }:
-{ pkgs, config, ... }:
+{ pkgs, config, lib, ... }:
 let
   # mini.nvim from flake input
   mini-nvim = pkgs.vimUtils.buildVimPlugin {
@@ -10,6 +10,16 @@ let
 
   # All plugins from imports
   allPlugins = import ./plugins.nix { inherit pkgs; };
+
+  # Create nv2 wrapper script (like your system's nv command)
+  # Explicitly loads config file and adds all plugins to runtimepath
+  nv2 = pkgs.writeShellScriptBin "nv2" ''
+    srcDir="${config.home.homeDirectory}/.dotfiles/nix_neovim_v2"
+    exec ${pkgs.neovim}/bin/nvim -u "$srcDir/nvim/init.lua" \
+      --cmd "set rtp^=$srcDir/nvim" \
+      ${builtins.concatStringsSep " " (map (p: "--cmd \"set rtp+=${p}\"") ([mini-nvim] ++ allPlugins))} \
+      "$@"
+  '';
 
 in
 {
@@ -26,6 +36,9 @@ in
   };
 
   home.packages = with pkgs; [
+    # nv2 command alias
+    nv2
+
     # CLI tools
     ripgrep
     fd
