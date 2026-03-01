@@ -1,47 +1,26 @@
 -- nvim/lua/plugins/treesitter.lua
+-- Treesitter configuration for Nix-managed environment
+-- Parsers are provided by nvim-treesitter.withPlugins in devenv.nix / hm-module.nix
+-- No ensure_installed or auto_install needed
 
-require("nvim-treesitter.configs").setup({
-  ensure_installed = {
-    "lua",
-    "vim",
-    "vimdoc",
-    "python",
-    "nix",
-    "rust",
-    "go",
-    "javascript",
-    "typescript",
-    "tsx",
-    "json",
-    "yaml",
-    "html",
-    "css",
-    "markdown",
-    "markdown_inline",
-    "bash",
-    "c",
-    "cpp",
-  },
-  sync_install = false,
-  auto_install = true,
-  highlight = {
-    enable = true,
-    additional_vim_regex_highlighting = false,
-  },
-  indent = {
-    enable = true,
-  },
-  incremental_selection = {
-    enable = true,
-    keymaps = {
-      init_selection = "<CR>",
-      node_incremental = "<CR>",
-      scope_incremental = false,
-      node_decremental = "<BS>",
-    },
-  },
+-- Enable treesitter-based highlighting for all supported buffers
+vim.api.nvim_create_autocmd("FileType", {
+  callback = function(args)
+    local ok = pcall(vim.treesitter.start, args.buf)
+    if not ok then return end
+  end,
 })
 
+-- Enable treesitter-based indentation
+vim.api.nvim_create_autocmd("FileType", {
+  callback = function()
+    if pcall(vim.treesitter.get_parser) then
+      vim.bo.indentexpr = "v:lua.require'nvim-treesitter.indent'.get_indent(v:lnum)"
+    end
+  end,
+})
+
+-- Treesitter context (sticky function headers)
 require("treesitter-context").setup({
   max_lines = 3,
   trim_scope = "outer",

@@ -9,24 +9,28 @@ end
 check_api_key("ANTHROPIC_API_KEY", "Anthropic")
 check_api_key("OPENAI_API_KEY", "OpenAI")
 
-require("codecompanion").setup({
+local ok, codecompanion = pcall(require, "codecompanion")
+if not ok then
+  vim.notify("codecompanion.nvim not available", vim.log.levels.WARN)
+  return
+end
+
+codecompanion.setup({
   adapters = {
-    http = {
-      anthropic = function()
-        return require("codecompanion.adapters").extend("anthropic", {
-          env = {
-            api_key = os.getenv("ANTHROPIC_API_KEY") or "",
-          },
-        })
-      end,
-      openai = function()
-        return require("codecompanion.adapters").extend("openai", {
-          env = {
-            api_key = os.getenv("OPENAI_API_KEY") or "",
-          },
-        })
-      end,
-    },
+    anthropic = function()
+      return require("codecompanion.adapters").extend("anthropic", {
+        env = {
+          api_key = os.getenv("ANTHROPIC_API_KEY") or "",
+        },
+      })
+    end,
+    openai = function()
+      return require("codecompanion.adapters").extend("openai", {
+        env = {
+          api_key = os.getenv("OPENAI_API_KEY") or "",
+        },
+      })
+    end,
   },
   display = {
     action_palette = {
@@ -44,12 +48,11 @@ require("codecompanion").setup({
     },
   },
   strategies = {
-    chat = "anthropic",
-    inline = "openai",
-  },
-  http = {
-    opts = {
-      log_level = "ERROR",
+    chat = {
+      adapter = "anthropic",
+    },
+    inline = {
+      adapter = "openai",
     },
   },
 })

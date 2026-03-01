@@ -1,0 +1,7 @@
+# devenv.sh artifacts
+.devenv*
+devenv.local.nix
+.direnv
+
+# Nix build artifacts
+result
