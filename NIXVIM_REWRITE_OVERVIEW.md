@@ -1,1239 +1,859 @@
-# NIXVIM to nix_neovim Rewrite Overview
+# Nixvim Rewrite: Honest Assessment & Streamlined Config Design
 
-## Executive Summary
+## Why This Document Exists
 
-This document outlines the complete feature set of your current nixvim-based daily driver configuration and provides a migration plan to a lua-based configuration built with `nix_neovim`, leveraging built-in Neovim v0.12+ functionality and the mini.nvim framework.
+Your current nixvim daily driver has ~50 plugins spread across 62 Nix modules. On the
+surface it looks well-organized. Underneath, it is a configuration that has grown by
+accretion -- plugins were added to solve problems, then more plugins were added on top
+when the first ones didn't quite work right, and nobody went back to remove the layers
+underneath. The result is a config where the same task can be done 3-4 different ways
+through different plugins, plugins silently fight each other for control of the same
+Neovim subsystems, and the mental model required to use the editor is far larger than it
+needs to be.
 
-**Current Status**: nixvim provides 50+ plugins across 62 configuration modules
-**Target Approach**: Consolidate into lua-based config using mini.nvim and builtin features
+This document does three things:
 
----
-
-## Part 1: Current Daily Driver Configuration Inventory
-
-### A. EDITOR FUNDAMENTALS (sets.nix)
-
-#### Enabled Features
-- **Line Numbers**: Absolute (relative disabled by default)
-- **Indentation**: 2-space tabs, smart indent enabled, expandtab
-- **Search**: Case-insensitive with smart case, ripgrep integration (`--vimgrep`)
-- **Performance**: updatetime=50ms, signcolumn always visible
-- **History**: Persistent undo enabled, no swapfiles/backups
-- **Wrapping**: Enabled with breakindent
-- **Scrolling**: 8-line scrolloff (center cursor), splitbelow/splitright
-- **Display**: 24-bit colors, cursorline highlight, 120-column guide
-- **Cursor Modes**: Block (normal/visual/cmd), vertical bar (insert), horizontal (replace)
-- **Whitespace**: Visible list chars (space/trail/extends/precedes/nbsp)
-- **Command**: 3-line height, showmode enabled
-- **Encoding**: UTF-8
-- **Fold**: foldenable with foldlevel=99 on start
-- **GUI** (Neovide): MonoLisa Trial 15px, ripple cursor, 0.8 transparency, 165Hz refresh
-
-**Complexity Score**: ⭐⭐ (well-organized, mostly standard settings)
+1. **Honestly catalogues what's wrong** with the current config
+2. **Proposes a streamlined replacement** built on a small, coherent mental model
+3. **Explains every decision** so you understand the "why", not just the "what"
 
 ---
 
-### B. KEYBINDINGS & MAPPINGS (keymaps.nix)
+## Part 1: Critical Analysis of the Current Config
 
-#### Key Statistics
-- **Total Mappings**: 80+ keybindings
-- **Leader Key**: SPACE
-- **Structure**: Categorical with group prefixes
+### The Core Problem: Accretion Without Pruning
 
-#### Category Breakdown
+The config was built by adding plugins to solve problems, without removing what they
+replaced. This created layers of redundancy:
 
-| Category | Prefix | Function | Count |
-|----------|--------|----------|-------|
-| File/Find | `<leader>f` | Find files, grep, buffers | 6+ |
-| Search | `<leader>s` | Search operations | ~3 |
-| Quit/Session | `<leader>q` | Exit, session mgmt, restore | 4 |
-| Git | `<leader>g` | Git operations | Various (via plugins) |
-| UI | `<leader>u` | Toggles (lines, wrap, hints) | 4 |
-| Windows | `<leader>w` | Split, navigate, close | 4 |
-| Navigation | `<leader><Tab>` | Buffer & tmux navigation | ~8 |
-| Debug | `<leader>d` | DAP operations | ~15 |
-| Code | `<leader>c` | LSP, formatting, actions | Various (via plugins) |
-| Test | `<leader>t` | Test execution | ~8 |
-| Obsidian | `<leader>o` | Note management | 5 |
+```
+Layer 1: Native Neovim (LSP, diagnostics, vim.ui)
+Layer 2: Foundational plugins (Telescope, CMP, Treesitter)
+Layer 3: Enhancement plugins (LSPSaga, Noice, Dressing)
+Layer 4: Mini.nvim modules (pick, diff, completion, files)
+Layer 5: Convenience plugins (wilder, better-escape, illuminate)
+```
 
-#### Core Navigation Mappings
-- **Movement**: j/k (smart wrap), n/N (search centering), J (join), C-d/u (center)
-- **Selection**: Visual J/K (move lines), </> (indent while selected)
-- **Paste**: `<leader>p` (paste without clobbering register)
-- **Copy**: C-c/C-C (system clipboard)
-
-#### Custom Lua Functions
-1. `ToggleLineNumber()` - Toggle absolute line numbers with notification
-2. `ToggleRelativeLineNumber()` - Toggle relative line numbers with notification
-3. `ToggleWrap()` - Toggle text wrapping with notification
-
-**Complexity Score**: ⭐⭐⭐⭐ (extensive, well-organized, clear semantics)
+Layers 3-5 often duplicate or conflict with Layers 1-2. Here are the specific problems.
 
 ---
 
-### C. LANGUAGE SERVER PROTOCOL (LSP)
+### 1.1 The Notification Disaster (3 plugins fighting for vim.notify)
 
-#### Enabled Servers (lsp.nix)
-| Language | Server | Features |
-|----------|--------|----------|
-| C/C++ | clangd | Full IDE support |
-| Lua | lua_ls | Hints, call snippets, telemetry=off |
-| Nix | nil_ls | Complete Nix support |
-| JavaScript/TypeScript | eslint | Linting (via lspsaga) |
-| Python | pyright + ruff-lsp | Type checking + linting |
-| Rust | rust-analyzer | Clippy, proc macros, inlay hints |
+**Players**: nvim-notify, fidget.nvim, noice.nvim
 
-#### LSP UI Configuration (via LSPSaga)
-- **Navigation**: gd (definition), gr (references), gI (implementation), gT (type)
-- **Hover**: K (documentation with borders)
-- **Rename**: `<leader>cr` (via LSPSaga)
-- **Code Actions**: `<leader>ca` (with lightbulb)
-- **Diagnostics**: `<leader>cd`, [d/]d (jump)
-- **Breadcrumbs**: Symbol navigation in winbar
-- **Beacon**: Cursor jump highlighting
+All three attempt to own the notification pipeline:
 
-**Complexity Score**: ⭐⭐⭐ (sophisticated, uses LSPSaga for advanced features)
+- **nvim-notify**: Overrides `vim.notify` globally in its extraConfigLua
+- **fidget.nvim**: Sets `overrideVimNotify = true`, also claiming `vim.notify`. Then
+  *delegates back* to nvim-notify for certain message types
+- **noice.nvim**: Takes over the command-line message display layer (even with
+  `notify.enabled = false`)
+
+The config author literally left a comment in default.nix: *"Different notification
+manager. Why both?"* -- and never answered the question.
+
+**What actually happens**: Load order determines who wins. You have a Rube Goldberg
+notification chain where fidget intercepts, sometimes delegates to nvim-notify, while
+noice owns the message display. Three plugins doing one job.
+
+**What you need**: One notification system. Period.
 
 ---
 
-### D. CODE FORMATTING & LINTING
+### 1.2 The vim.ui.select Collision (3 plugins overriding the same function)
 
-#### Conform.nvim (Formatting)
-| Languages | Tools |
-|-----------|-------|
-| HTML/CSS/Markdown | Prettierd/Prettier |
-| JavaScript/TypeScript | Prettierd/Prettier |
-| Java | Google Java Format |
-| Python | Ruff Format |
-| Lua | Stylua |
-| Nix | Alejandra |
-| Rust | Rustfmt |
+**Players**: dressing.nvim, telescope ui-select extension, mini.pick
 
-**Features**: Auto-format on save (toggleable via `<leader>uf`)
+- **dressing.nvim**: Overrides `vim.ui.select` with backend priority
+  `["telescope", "fzf_lua", "fzf", "builtin", "nui"]`
+- **telescope ui-select**: Extension that also claims `vim.ui.select`
+- **mini.pick**: Has `vim.ui.select = require('mini.pick').ui_select` in
+  `extraConfigLuaPost` (though currently commented out in the import)
 
-#### Nvim-Lint (Linting)
-| Languages | Tools |
-|-----------|-------|
-| Nix | Statix |
-| Lua | Selene |
-| Python | Ruff |
-| JavaScript/TypeScript | ESLint_d |
-| JSON | Jsonlint |
-| Java | Checkstyle |
+Right now dressing and telescope ui-select are both active and fighting over who handles
+code actions and other select prompts. The winner depends on load order.
 
-**Complexity Score**: ⭐⭐ (well-integrated, external tool management)
+**What you need**: One `vim.ui.select` handler.
 
 ---
 
-### E. COMPLETION SYSTEM
+### 1.3 Duplicate Gutter Signs (gitsigns + mini.diff doing the same thing)
 
-#### Nvim-CMP Engine
-- **Sources** (priority order):
-  1. LSP completions
-  2. Emoji
-  3. Buffer text (3+ chars)
-  4. Copilot suggestions
-  5. File paths (3+ chars)
-  6. Luasnip snippets (3+ chars)
+**Players**: gitsigns.nvim, mini.diff
 
-#### Configuration
-- **Performance**: 60ms debounce, 200ms fetch timeout, max 30 visible
-- **Keys**: C-j/k (select), Tab (confirm), C-Space (trigger), C-b/f (scroll docs)
+Both plugins place diff signs in the sign column:
+- **gitsigns**: Standard git signs (+, ~, -)
+- **mini.diff**: Configured with `view.style = "sign"` using (+, ~, _)
 
-#### Copilot Integration
-- **Mode**: CMP-integrated (panel disabled)
-- **Format**: Suggestion display with icon
+Two plugins racing to fill the same gutter for the same purpose. You see doubled or
+flickering signs.
 
-#### Luasnip (Snippets)
-- **Library**: friendly-snippets (VSCode-style)
-- **Auto-snippets**: Enabled
-- **Selection**: Tab key
-
-**Complexity Score**: ⭐⭐⭐ (multiple sources, Copilot integration adds complexity)
+**What you need**: One gutter sign provider for git status.
 
 ---
 
-### F. FUZZY FINDING & FILE NAVIGATION
+### 1.4 Double Linting (LSP servers duplicating standalone linters)
 
-#### Telescope (Primary Picker)
-**File/Project Operations**:
-- `<leader><space>/ff` - Find project files
-- `<C-p>` - Search git files
-- `<leader>/` - Live grep
-- `<leader>fb` - List buffers
-- `<leader>fr` - Recent files
-- `<leader>fp` - Projects (via project.nvim)
+**Players**: eslint LSP + eslint_d in nvim-lint, ruff-lsp + ruff in nvim-lint
 
-**Git Integration**:
-- `<leader>gc/gs` - Commits/Status
+- **eslint** is enabled as an LSP server AND eslint_d runs as a standalone linter via
+  nvim-lint. Every eslint violation appears twice in JavaScript/TypeScript files.
+- **ruff-lsp** provides linting AND formatting for Python. nvim-lint *also* runs ruff
+  as a standalone linter. conform.nvim *also* runs ruff_format. Triple coverage on the
+  same tool for the same language.
 
-**Search**:
-- `<leader>sa-sR` - Various (autocommands, buffer, commands, diag, help, highlights, keys, marks, options, resume)
-- `<leader>sd` - Document diagnostics
-- `<leader>st` - Search todos
-- `<leader>uC` - Colorscheme preview
-
-**Extensions**:
-- fzf-native (sorting)
-- ui-select (LSP code actions)
-- undo (undo tree browser)
-
-#### Mini.files
-- `<leader>e` - File explorer (simple file tree)
-
-#### Project.nvim
-- Project detection and switching
-
-**Complexity Score**: ⭐⭐⭐ (feature-rich, multiple extensions)
+**What you need**: For each language, one linting path and one formatting path. Not both
+LSP and standalone.
 
 ---
 
-### G. DEBUGGING (DAP)
+### 1.5 Six Ways to View Diagnostics (3 plugins, 6 keybindings)
 
-#### Configuration
-- **Python**: dap-python
-- **Java**: Remote debugging (port 5005)
-- **UI Extensions**: DAP UI, Virtual Text
+**Players**: trouble.nvim, lspsaga, telescope
 
-#### Keybindings
-| Key | Action |
-|-----|--------|
-| `<leader>db` | Toggle breakpoint |
-| `<leader>dB` | Conditional breakpoint |
-| `<leader>dc` | Continue |
-| `<leader>da` | Run with args |
-| `<leader>dC` | Run to cursor |
-| `<leader>di/O/o` | Step into/over/out |
-| `<leader>dj/dk` | Stack up/down |
-| `<leader>dr` | Toggle REPL |
-| `<leader>du` | DAP UI toggle |
-| `<leader>dt` | Terminate |
+A user wanting to see diagnostics must choose between:
 
-**Complexity Score**: ⭐⭐⭐ (complex feature, language-specific adapters)
+| Keybind | Plugin | View Type |
+|---------|--------|-----------|
+| `<leader>cd` | LSPSaga | Floating line diagnostic |
+| `<leader>xx` | Trouble | Panel (document) |
+| `<leader>xX` | Trouble | Panel (workspace) |
+| `<leader>sd` | Telescope | Fuzzy list (document) |
+| `<leader>sD` | Telescope | Fuzzy list (workspace) |
+| `[d` / `]d` | LSPSaga | Jump next/prev (and reversed -- see bugs) |
+
+This is not "power through choice." It is cognitive overhead. A developer should not
+need to think about which of three UI paradigms they want for looking at the same data.
+
+**What you need**: One primary diagnostic workflow. Jump between them with `[d`/`]d`,
+view them all with one keybind.
 
 ---
 
-### H. TESTING (Neotest)
+### 1.6 Three Ways to Find a File
 
-#### Configuration
-- **Adapters**: Python, Vitest, Plenary
-- **Features**: Auto-open output, summary window
+**Players**: telescope (find_files AND git_files), mini.files, project.nvim, alpha dashboard
 
-#### Keybindings
-| Key | Action |
-|-----|--------|
-| `<leader>tt` | Run current test file |
-| `<leader>tT` | Run all tests |
-| `<leader>tr` | Run nearest test |
-| `<leader>td` | Debug test (via DAP) |
-| `<leader>ts` | Toggle summary |
-| `<leader>to` | Show output |
+| Keybind | Plugin | What it does |
+|---------|--------|-------------|
+| `<leader><space>` | Telescope | find_files |
+| `<leader>ff` | Telescope | find_files (same as above) |
+| `<C-p>` | Telescope | git_files |
+| `<leader>e` | mini.files | File explorer |
+| `<leader>fp` | Telescope + project.nvim | Project switch |
+| Alpha `f` key | Telescope | find_files again |
 
-**Complexity Score**: ⭐⭐⭐ (multiple adapters, DAP integration)
+`<leader><space>` and `<leader>ff` are *literally the same action* with two keybinds.
+`<C-p>` is almost the same as `<leader>ff` but limited to git-tracked files. The user
+has to decide: "do I want project files, git files, or browse a tree?" for what is
+conceptually one task: "open a file."
 
----
-
-### I. GIT INTEGRATION
-
-#### Gitsigns (Git decorations)
-- **Hunks**: `<leader>ghp` (preview), `<leader>ghs/r` (stage/reset), `<leader>ghS/R` (buffer)
-- **Blame**: `<leader>ghb` (current line)
-- **Diff**: `<leader>ghd` (file diff)
-
-#### Neogit (Status/Commit Interface)
-- `<leader>gg` - Open Neogit buffer
-
-#### Diffview.nvim
-- Side-by-side diffs integrated with Neogit
-
-#### Octo.nvim (GitHub)
-- Issues, PRs, discussions directly in Neovim
-
-**Complexity Score**: ⭐⭐⭐ (three complementary tools, rich workflow)
+**What you need**: One fuzzy finder. One file browser. Clear when to use which.
 
 ---
 
-### J. UI/UX ENHANCEMENTS
+### 1.7 Three Ways to See Diffs
 
-#### Colorscheme: Catppuccin Mocha
-- **Theme**: Dark mode, transparent background
-- **Integrations**: LSP, Treesitter, Noice, Notify, Telescope, Mini, Gitsigns, Indent-blankline, Illuminate
+**Players**: gitsigns, diffview.nvim, mini.diff
 
-#### Alpha (Dashboard)
-- Splash screen with quick action buttons (find files, new file, recent, search, restore session, quit)
+- `<leader>ghd` -- gitsigns diffthis (inline)
+- `:DiffviewOpen` -- diffview (full tab, no keybind configured)
+- mini.diff -- always-on gutter signs (duplicating gitsigns)
 
-#### Noice (Command/Message UI)
-- Popupmenu via NUI
-- Filter/replace command preview
-- LSP messages enabled
-
-#### Nvim-notify (Notifications)
-- FPS: 60, Timeout: 1s, Stacked top-down
-- Dismiss via `<leader>un`
-
-#### Dressing.nvim (Input/Select UI)
-- Rounded borders
-- Smart backend selection (Telescope > FZF > NUI > Builtin)
-
-#### Bufferline
-- **Style**: Slant separator, underline indicator
-- **Navigation**: Tab/S-Tab (cycle), S-h/S-l (alt), `<leader><Tab><Space>h/l/d/p/P` (prev/next/delete/pin)
-
-#### Indent-blankline
-- Visual guides `│`, scope highlighting, buffer type exclusions
-
-#### Lualine (Statusline)
-- Theme: Auto, global status, FZF extension
-
-**Complexity Score**: ⭐⭐⭐⭐ (5 complementary UI plugins, rich visual customization)
+**What you need**: Gitsigns for inline hunks. Drop mini.diff (it duplicates gitsigns).
+Diffview if you need full-file comparison, but wire it to a keybind.
 
 ---
 
-### K. UTILITIES & CONVENIENCES
+### 1.8 The LSPSaga Layer Problem
 
-#### Session Management: Persistence
-- Auto-save/restore sessions
-- Controls: `<leader>qs` (save), `<leader>ql` (last), `<leader>qd` (don't save)
+LSPSaga is an entire parallel LSP UI that shadows native Neovim LSP features. Your
+lsp.nix configures custom borders for `vim.lsp.handlers["textDocument/hover"]` -- but
+LSPSaga's `K` mapping intercepts hover before the native handler ever fires. That border
+config is dead code.
 
-#### Terminal: Toggleterm
-- `<A-i>` - Toggle terminal (15-line horizontal, Zsh)
-- Auto-scroll, persistent mode, close on exit
+The native LSP keymaps in lsp.nix are entirely commented out because LSPSaga replaced
+them. LSPSaga adds:
+- Custom hover (K)
+- Custom definition finder (gd)
+- Custom references (gr)
+- Custom rename (leader cr)
+- Custom code actions (leader ca)
+- Custom diagnostics (leader cd)
+- Beacon effects
+- Breadcrumbs in winbar
+- Lightbulb virtual text
 
-#### Window Navigation: Tmux Navigator
-- Seamless Neovim ↔ Tmux pane navigation
+**The question**: Neovim 0.11+ now has native `vim.lsp.buf.hover()` with configurable
+borders, `vim.diagnostic.jump()`, improved code action UI, and inlay hints. Most of what
+LSPSaga provides is now built into Neovim. The beacon and breadcrumbs are nice polish,
+but they come at the cost of an entire plugin that overrides your entire LSP interaction
+model.
 
-#### Word Highlight: Illuminate
-- Currently **disabled** (would highlight word occurrences)
-
-#### Todo Comments
-- Highlights TODO/FIXME/etc in code
-- Integration with Telescope (`<leader>st`) and Trouble
-
-#### Better-escape
-- Smooth escape key handling
-
-#### Undotree (`<leader>ut`)
-- Undo history visualization
-
-#### Vim-be-good
-- Vim practice/training plugin
-
-#### Markdown Preview
-- Browser preview for Markdown files
-
-#### NVim-colorizer
-- Inline color preview in code
-
-#### Wilder (Command Completion)
-- Fuzzy command-line completion (Python-based)
-
-#### Plenary
-- Lua utility library (dependency)
-
-#### Mini Suite Integrations
-- **mini.ai**: Smart text objects
-- **mini.basics**: Window management, buffer deletion
-- **mini.comment**: Line comment toggle (`<leader>/`)
-- **mini.diff**: Diff visualization
-- **mini.pairs**: Auto pair handling
-- **mini.clue**: Keymap helper/which-key
-
-**Complexity Score**: ⭐⭐⭐ (broad ecosystem, many small conveniences)
+**What you need**: Decide if LSPSaga's chrome is worth owning a separate LSP
+interaction layer. For a streamlined config, native LSP + a few keybindings replaces
+90% of what LSPSaga does.
 
 ---
 
-### L. LANGUAGE-SPECIFIC FEATURES
+### 1.9 The Command-Line Triple Layer
 
-#### Treesitter
-- **Enabled**: indent, folding, nixvim injections
-- Robust syntax highlighting and tree-based navigation
+**Players**: wilder.nvim, noice.nvim, cmp-cmdline
 
-#### Treesitter Extensions
-- **Context**: Scope display during scrolling
-- **Textobjects**: Enhanced selection operators
+- **wilder**: Takes over `:`, `/`, `?` modes with fuzzy matching
+- **noice**: Provides its own popupmenu replacement via NUI
+- **cmp-cmdline**: Disabled in Nix (`enable = false`) but the Lua code in cmp.nix still
+  calls `cmp.setup.cmdline()` for both `:` and `/`/`?` modes
 
-#### Conjure (Fennel/Lisp)
-- Interactive REPL support for Fennel development
+Three plugins attempting to enhance the same command-line. The cmp-cmdline setup is
+ghost code -- the plugin isn't installed, so the Lua silently fails.
 
-#### Obsidian Integration
-- **Vault**: `~/Documents/Notes`
-- **Features**: Frontmatter disabled, conceallevel=2, checkbox toggle, search, paste images
-- **Keys**: `<leader>o*`
-
-**Complexity Score**: ⭐⭐ (good language support, Obsidian adds specialized integration)
+**What you need**: Native command-line is fine. Or wilder. Not three layers.
 
 ---
 
-## Part 2: Migration to nix_neovim (Lua-Based Architecture)
+### 1.10 Dead Weight
 
-### Architecture Overview
+These are either disabled, never activated, or provide near-zero value:
 
-Current nix_neovim structure:
+| Plugin | Status | Issue |
+|--------|--------|-------|
+| **illuminate** | `enable = false` | Imported but disabled |
+| **treesitter-textobjects** | `enable = false` | Imported but disabled |
+| **neotest** | Uses `mkEnableOption` | No `enable = true` anywhere -- never activates |
+| **cmp-cmdline** | `enable = false` + Lua calls it | Ghost code |
+| **vim-be-good** | Active | A practice game in an IDE config |
+| **better-escape** | Active | Neovim handles escape fine |
+| **nui-components** | Extra plugin | Nothing references it |
+| **lsp-format** | `enable = false` | Declared, disabled |
+| **3 colorschemes** | All imported | Only one can be active |
+| **kind_icons in cmp** | Lua table | Duplicates lspkind.nvim |
+
+---
+
+### 1.11 Keybinding Bugs
+
+**`[d`/`]d` are backwards**: LSPSaga maps `[d` to `diagnostic_jump_next` and `]d` to
+`diagnostic_jump_prev`. Standard vim convention: `[` = previous, `]` = next. These are
+swapped.
+
+**`<leader><Tab><Space>d` for buffer delete**: Four sequential keypresses to close a
+buffer. This is ergonomically hostile.
+
+**`<Tab>` is overloaded**: In normal mode it cycles buffers (bufferline). In insert mode
+it confirms completion (cmp). In visual mode it stores selection (luasnip). Tab is doing
+three unrelated things.
+
+---
+
+## Part 2: The Mental Model (What the New Config Should Feel Like)
+
+Before listing plugins, here is the mental model a developer should carry when using
+this editor. If you can't hold it in your head, the config is too complex.
+
+### The Developer's Mental Model
+
+```
+I edit code.
+  - Neovim handles: syntax (treesitter), editing (motions, text objects)
+  - I extend with: mini.ai (smarter text objects), mini.surround, mini.pairs
+
+I navigate.
+  - <leader>ff : find a file by name (fuzzy)
+  - <leader>fg : find text in files (grep)
+  - <leader>fb : switch between open buffers
+  - <leader>e  : browse the file tree
+  - That's it. Four operations for all navigation.
+
+I read and write code with language intelligence.
+  - Neovim's built-in LSP handles: hover, go-to-definition, references,
+    rename, code actions, diagnostics
+  - conform.nvim formats on save
+  - [d / ]d jumps between diagnostics
+  - K shows documentation. gd goes to definition. gr shows references.
+  - No extra plugins needed. It's all native.
+
+I use git.
+  - Gitsigns shows what changed in the gutter and lets me stage/reset hunks
+  - <leader>gg opens Neogit for commits/branches/push/pull
+  - That's the whole git workflow.
+
+I debug and test when needed.
+  - DAP keybindings under <leader>d (these are complex by nature -- that's fine)
+  - Neotest keybindings under <leader>t
+
+I manage my session.
+  - Sessions auto-save and auto-restore
+  - <leader>qq quits
+
+I see what I need.
+  - One colorscheme (not three)
+  - One statusline
+  - One notification system
+  - Indent guides in the gutter
+```
+
+That's it. No "which of three diagnostic viewers do I use?" No "is this the fuzzy
+finder or the other fuzzy finder?" Every task has exactly one answer.
+
+---
+
+## Part 3: The Streamlined Config Design
+
+### Architecture
+
 ```
 nvim/
 ├── lua/
 │   ├── config/
-│   │   ├── init.lua          (entrypoint)
-│   │   ├── keymaps.lua       (all keybindings)
-│   │   └── options.lua       (editor settings)
+│   │   ├── init.lua          -- loads options, keymaps, autocmds
+│   │   ├── options.lua       -- vim.opt settings (pure builtin)
+│   │   ├── keymaps.lua       -- all keybindings (pure builtin)
+│   │   └── autocmds.lua      -- autocommands
 │   └── plugins/
-│       ├── init.lua          (plugin requires)
-│       ├── mini.lua          (mini.nvim ecosystem)
-│       ├── lsp.lua           (LSP configuration)
-│       ├── sessions.lua      (session management)
-│       └── starter.lua       (dashboard/startup)
-├── init.lua                  (main entrypoint)
-├── plugins.nix               (dependency declarations)
-└── flake.nix                 (Nix flake)
+│       ├── init.lua          -- loads all plugin configs
+│       ├── mini.lua          -- mini.nvim: the core framework
+│       ├── lsp.lua           -- native LSP setup (vim.lsp.config)
+│       ├── format.lua        -- conform.nvim
+│       ├── lint.lua          -- nvim-lint
+│       ├── treesitter.lua    -- treesitter + context
+│       ├── git.lua           -- gitsigns + neogit
+│       ├── dap.lua           -- debugging (when needed)
+│       ├── test.lua          -- neotest (when needed)
+│       └── tools.lua         -- obsidian, markdown-preview, etc.
+├── init.lua                  -- entrypoint
+└── plugins.nix               -- Nix dependency declarations
 ```
 
-### Design Principles for Migration
-
-1. **Minimize External Plugins**: Prefer Neovim v0.12+ builtin functionality
-2. **Maximize mini.nvim**: Use mini.nvim modules for common tasks
-3. **Keep Nix Clean**: Use Nix only for dependency management, not configuration
-4. **Preserve Functionality**: Every feature from daily driver must be implemented
-5. **Simplify Where Possible**: Consolidate similar features and reduce plugin count
+**10 plugin config files, not 62 Nix modules.** Each file has a clear, singular purpose.
 
 ---
 
-## Part 3: Feature Mapping & Migration Strategy
+### Design Principles
 
-### Feature Tier System
+1. **One answer per question.** "How do I find a file?" has exactly one answer. Not three.
 
-**Tier 1 (Builtin)**: Use Neovim's native capabilities
-**Tier 2 (mini.nvim)**: Use mini.nvim ecosystem modules
-**Tier 3 (Specialized)**: Use minimal external plugins for unique features
-**Tier 4 (Consider Removing)**: Low-value plugins with high maintenance burden
+2. **Three layers, not five.**
+   - Layer 1: Neovim builtins (LSP, diagnostics, treesitter, vim.ui)
+   - Layer 2: mini.nvim (fills gaps in builtins with one consistent framework)
+   - Layer 3: Specialized plugins (only when mini + builtin can't do the job)
+
+3. **If Neovim 0.11+ added it, the plugin goes away.**
+   Neovim now has: native LSP config API, `vim.diagnostic` with virtual text and
+   floating windows, `vim.lsp.buf.code_action()`, inlay hints, `vim.snippet`,
+   configurable borders on all floating windows. LSPSaga, trouble, fidget, and others
+   are no longer necessary for their core features.
+
+4. **mini.nvim is the plugin framework, not a supplement.**
+   Instead of 15 separate plugins for separate concerns, mini.nvim provides a unified
+   framework: same author, same API patterns, same configuration style. This radically
+   reduces cognitive load. When you need something, you ask: "does mini have a module
+   for this?" Usually yes.
+
+5. **No dead code. No disabled plugins. No phantom configs.**
+   If it's not active, it's not in the config.
 
 ---
 
-### A. EDITOR FUNDAMENTALS → Tier 1 (Builtin)
+### The Plugin Stack (Explanation and Reasoning)
 
-**Current**: sets.nix (nixvim)
-**Target**: `lua/config/options.lua`
+#### Tier 1: Neovim Builtins (0 plugins)
 
-✅ **All editor options map directly to `vim.opt` calls**
+These features require zero plugins in Neovim 0.11+:
 
-```lua
--- From sets.nix → options.lua
-vim.opt.number = true
-vim.opt.relativenumber = false
-vim.opt.tabstop = 2
-vim.opt.softtabstop = 2
-vim.opt.expandtab = true
--- ... etc (100% compatible)
+| Feature | Builtin API | Replaces |
+|---------|------------|----------|
+| LSP hover | `vim.lsp.buf.hover()` | LSPSaga hover |
+| Go to definition | `vim.lsp.buf.definition()` | LSPSaga finder |
+| References | `vim.lsp.buf.references()` | LSPSaga finder |
+| Rename | `vim.lsp.buf.rename()` | LSPSaga rename |
+| Code actions | `vim.lsp.buf.code_action()` | LSPSaga code action |
+| Diagnostics | `vim.diagnostic.open_float()` | LSPSaga / Trouble |
+| Diagnostic jump | `vim.diagnostic.jump()` | LSPSaga diagnostic_jump |
+| Inlay hints | `vim.lsp.inlay_hint.enable()` | LSPSaga |
+| Snippet expansion | `vim.snippet` | LuaSnip (partially) |
+| LSP server config | `vim.lsp.config()` + `vim.lsp.enable()` | nvim-lspconfig |
+| Input/select UI | `vim.ui.input()` / `vim.ui.select()` | dressing.nvim |
+| Comment toggle | `gc` operator (native since 0.10) | mini.comment |
+
+**Why this matters**: Every plugin you don't load is a plugin you don't configure,
+don't debug, don't update, and don't need to hold in your head.
+
+Note on `vim.ui.select`: The builtin is basic. mini.pick can enhance it if desired,
+but start with native and only add if you actually miss the polish.
+
+Note on `vim.snippet`: Neovim 0.11 has a native snippet engine. If you rely heavily on
+friendly-snippets and LuaSnip's advanced features, keep LuaSnip. But try native first.
+
+Note on comments: `gc`/`gcc` is built into Neovim since 0.10. mini.comment is no longer
+needed unless you want specific customization.
+
+---
+
+#### Tier 2: mini.nvim (1 plugin, many modules)
+
+This is the key insight: mini.nvim is *one* plugin that provides ~40 modules. You load
+only what you need. Same author, same patterns, same docs site. Your brain has one
+framework to understand, not 15 separate plugin APIs.
+
+| Module | Purpose | Replaces | Why |
+|--------|---------|----------|-----|
+| `mini.ai` | Smart text objects (around/inside) | treesitter-textobjects | Simpler API, works without treesitter queries |
+| `mini.surround` | Add/delete/change surroundings | (none active) | Essential editing enhancement |
+| `mini.pairs` | Auto-close brackets | (none active) | Simple, no config needed |
+| `mini.pick` | Fuzzy finder (files, grep, buffers) | Telescope + 3 extensions + project.nvim | One picker for everything. No extensions to manage |
+| `mini.files` | File explorer | (already used) | Simple tree browser |
+| `mini.notify` | Notifications | nvim-notify + fidget + noice notifications | One notification system. Done. |
+| `mini.statusline` | Status line | lualine | Zero-config, looks good |
+| `mini.tabline` | Buffer/tab line | bufferline.nvim | Zero-config, shows open buffers |
+| `mini.indentscope` | Indent guides | indent-blankline | Animated scope line, lighter |
+| `mini.cursorword` | Highlight word under cursor | illuminate (was disabled) | Simple, no config |
+| `mini.sessions` | Session save/restore | persistence.nvim | Already proven in nix_neovim |
+| `mini.starter` | Dashboard | alpha.nvim | Already proven in nix_neovim |
+| `mini.clue` | Keymap hints | (which-key style) | Shows available keys after leader press |
+| `mini.diff` | Git gutter signs | gitsigns (gutter only) | Wait -- see reasoning below |
+| `mini.move` | Move lines/selections | Custom J/K visual maps | Cleaner implementation |
+| `mini.trailspace` | Trailing whitespace | (listchars partial) | Highlight + trim |
+
+**On mini.diff vs gitsigns**: This is a genuine choice. mini.diff provides gutter
+signs. gitsigns provides gutter signs PLUS hunk staging, hunk preview, line blame, and
+buffer diff. Since you actively use hunk staging (`<leader>ghs`) and blame
+(`<leader>ghb`), **keep gitsigns and drop mini.diff**. Gitsigns does everything
+mini.diff does plus more, and they conflict in the gutter.
+
+**On mini.pick vs Telescope**: Telescope is powerful but brings 3 extensions, plenary
+dependency, and a large API surface. mini.pick does files, grep, buffers, and can hook
+into `vim.ui.select` for code actions. That covers 95% of real usage. The 5% you lose
+(undo browser, colorscheme previewer) is not worth the complexity.
+
+**On mini.completion vs nvim-cmp**: This is the hardest call. nvim-cmp has a rich
+source ecosystem (LSP, buffer, path, Copilot, snippets). mini.completion is simpler but
+can't do multi-source or Copilot. **Recommendation**: Start with mini.completion. If you
+miss Copilot integration, add blink.cmp (a newer, simpler alternative to nvim-cmp that
+supports Copilot). Do not bring back the full cmp + copilot-cmp + luasnip + lspkind
++ cmp-cmdline stack.
+
+---
+
+#### Tier 3: Specialized Plugins (Minimal, justified)
+
+These plugins exist because neither builtins nor mini.nvim can replace them:
+
+| Plugin | Purpose | Why it can't be replaced |
+|--------|---------|------------------------|
+| `nvim-lspconfig` | LSP server configurations | Convenience for server-specific settings. Neovim 0.11+ can work without it via `vim.lsp.config()`, but lspconfig provides sensible defaults and cmd resolution. Include it as a light dependency. |
+| `conform.nvim` | Code formatting | Neovim has no built-in multi-formatter orchestration. `vim.lsp.buf.format()` works for single-LSP formatting but can't chain formatters or handle the "prettierd then eslint --fix" pattern. conform is small and well-designed. |
+| `nvim-lint` | Linting beyond LSP | Some linters don't have LSP servers. nvim-lint fills that gap. **But**: eliminate double-linting. If a language has an LSP that lints (eslint, ruff-lsp), don't also run the standalone linter. |
+| `nvim-treesitter` | Syntax highlighting + parsing | Treesitter is builtin, but the nvim-treesitter plugin manages grammar installation and provides the `ensure_installed` API. Still needed. |
+| `treesitter-context` | Sticky scope header | Shows which function/class you're in when scrolled deep. Genuine quality-of-life with no builtin equivalent. Small, focused plugin. |
+| `gitsigns.nvim` | Git hunk operations | mini.diff can't stage hunks, show blame, or preview hunks. gitsigns can. This is the one git-in-editor plugin you actually need for day-to-day work. |
+| `neogit` | Git porcelain (commit/push/pull) | No builtin or mini equivalent for a Magit-style git interface. Neogit is the best option if you want to stay in the editor for git operations. Diffview integrates with it. |
+| `diffview.nvim` | Full-file diff comparison | For reviewing PRs or complex merges. Keep as a neogit companion. |
+| `nvim-dap` + `nvim-dap-ui` | Debugging | No builtin debugger. DAP is the standard. Only load this when you need it. |
+| `neotest` | Test runner | No builtin test framework integration. Neotest is the standard. Only load when you need it. |
+| `catppuccin` | Colorscheme | Personal preference. One colorscheme, not three. Alternatively, use `mini.hues` for zero-dependency theming (already demonstrated in nix_neovim). |
+
+**Total external plugins: 11** (plus adapters for DAP/neotest per language)
+
+Compare to current: **50+**
+
+---
+
+### What Gets Cut (and Why)
+
+| Cut | Reason |
+|-----|--------|
+| **LSPSaga** | Neovim 0.11+ native LSP provides hover, definition, references, rename, code actions, diagnostic jump with configurable UI. LSPSaga is an entire parallel interface for what's now builtin. The beacon effect and breadcrumbs are nice but not worth the cognitive overhead of a plugin that shadows every native LSP keybind. |
+| **Trouble.nvim** | `vim.diagnostic.setloclist()` or `vim.diagnostic.setqflist()` puts diagnostics in the quickfix list. Mini.pick can fuzzy-search diagnostics. Trouble is a third diagnostic UI on top of two others. |
+| **Fidget.nvim** | Was used for LSP progress indicators. Neovim 0.10+ has `LspProgress` events. A 5-line autocmd can show progress in the statusline or via mini.notify. Not worth a plugin. |
+| **Noice.nvim** | Replaces the native command line, message display, and popupmenu with a complex UI layer. Requires nui.nvim as a dependency. The builtin command line works fine. If you want prettier messages, mini.notify handles notifications. Drop the entire noice + nui stack. |
+| **Dressing.nvim** | Overrides `vim.ui.input` and `vim.ui.select`. Neovim's builtin input is fine. mini.pick can enhance `vim.ui.select` if desired. Not worth a separate plugin. |
+| **Bufferline.nvim** | mini.tabline does the same thing with zero config. Or just use `:ls` and `:b`. |
+| **Lualine.nvim** | mini.statusline does the same thing with zero config. |
+| **Alpha.nvim** | mini.starter does the same thing (already proven in nix_neovim). |
+| **nvim-notify** | mini.notify replaces it. |
+| **Indent-blankline** | mini.indentscope replaces it with a simpler, animated scope indicator. |
+| **Telescope** (+ fzf-native, ui-select, undo extensions) | mini.pick replaces the core functionality. You lose some niche pickers (undo browser, colorscheme preview) but gain a radically simpler setup. One picker framework instead of Telescope + 3 extensions + plenary. |
+| **project.nvim** | Mini.pick can search from project root. `vim.fn.getcwd()` + git root detection in a 3-line function handles project detection. |
+| **Wilder.nvim** | Native command-line completion is fine. This was fighting with noice and cmp-cmdline anyway. |
+| **Better-escape** | Neovim handles escape natively. This plugin solves a non-problem. |
+| **Vim-be-good** | A practice game. Not an IDE feature. |
+| **Illuminate** | Was already disabled. mini.cursorword replaces it. |
+| **Plenary** | No longer needed (was a Telescope dependency). |
+| **nui.nvim + nui-components** | No longer needed (were noice dependencies). |
+| **lspkind.nvim** | Was only adding icons to cmp. If using mini.completion, not needed. |
+| **Copilot-cmp + copilot-lua** | The two-plugin chain just to add one cmp source. If switching away from cmp, this chain dissolves. Consider standalone Copilot.vim if you want AI completion, or wait for mini.completion to potentially support it. |
+| **LuaSnip + friendly-snippets** | Try Neovim's native `vim.snippet` first. If it's insufficient, bring back LuaSnip as a targeted addition. |
+| **persistence.nvim** | mini.sessions replaces it. |
+| **toggleterm.nvim** | Neovim has a builtin terminal (`:terminal`). A few keymaps can toggle a terminal buffer. 10 lines of Lua replaces an entire plugin. |
+| **nvim-colorizer** | Nice but niche. If you actively use it, keep it. Otherwise cut. |
+| **markdown-preview.nvim** | Keep if you write markdown. It's small and focused. |
+| **Octo.nvim** | GitHub integration in Neovim. Niche. Use `gh` CLI instead. |
+| **base16 + rose-pine** | Loading 3 colorschemes when only one is active. Pick one. |
+| **mini.diff** | Conflicts with gitsigns. Gitsigns does everything mini.diff does plus hunk operations. Remove mini.diff. |
+
+---
+
+### The Final Plugin List
+
+```
+FRAMEWORK (1 plugin, ~15 modules loaded)
+  mini.nvim
+    ├── mini.ai           -- text objects
+    ├── mini.surround     -- surround operations
+    ├── mini.pairs        -- auto-close brackets
+    ├── mini.pick         -- fuzzy finder (files, grep, buffers, ui.select)
+    ├── mini.files        -- file explorer
+    ├── mini.notify       -- notifications
+    ├── mini.statusline   -- status line
+    ├── mini.tabline      -- buffer/tab line
+    ├── mini.indentscope  -- indent guides
+    ├── mini.cursorword   -- highlight word under cursor
+    ├── mini.sessions     -- session management
+    ├── mini.starter      -- dashboard
+    ├── mini.clue         -- keymap hints
+    ├── mini.move         -- move lines/blocks
+    └── mini.trailspace   -- trailing whitespace
+
+LANGUAGE INTELLIGENCE (3 plugins)
+  nvim-lspconfig        -- LSP server configs
+  conform.nvim          -- formatting
+  nvim-treesitter       -- syntax + treesitter-context
+
+GIT (3 plugins)
+  gitsigns.nvim         -- hunks, blame, staging
+  neogit                -- git porcelain
+  diffview.nvim         -- diff viewer
+
+DEBUGGING & TESTING (loaded on demand, 2+adapters)
+  nvim-dap + ui         -- debugging
+  neotest + adapters    -- testing
+
+OPTIONAL (0-2 plugins based on personal need)
+  catppuccin            -- colorscheme (or use mini.hues)
+  obsidian.nvim         -- if you use Obsidian
+  markdown-preview      -- if you write markdown
+
+TOTAL: ~12 external plugins (vs 50+ current)
 ```
 
-**Status**: ✅ READY - Zero migration effort needed
-
 ---
 
-### B. KEYBINDINGS → Tier 1 (Builtin) + Tier 2 (mini.clue)
+### Keybinding Design (The Complete Map)
 
-**Current**: keymaps.nix (80+ mappings)
-**Target**: `lua/config/keymaps.lua` + `lua/plugins/mini.lua`
+The entire keymap should fit on one screen. If it doesn't, it's too complex.
 
-**Strategy**:
-1. Translate all `vim.keymap.set()` calls (Tier 1)
-2. Use `mini.clue` for keymap grouping help (Tier 2)
+#### Core Editing (no leader, muscle memory)
 
-**Migration Status**:
-- ✅ Basic mappings (100% compatible with `vim.keymap.set()`)
-- ✅ Functional calls (custom Lua functions)
-- ⚠️ Which-key groups (convert to mini.clue annotations)
+| Key | Action | Source |
+|-----|--------|--------|
+| `K` | Hover documentation | builtin LSP |
+| `gd` | Go to definition | builtin LSP |
+| `gr` | References | builtin LSP |
+| `gD` | Declaration | builtin LSP |
+| `gi` | Implementation | builtin LSP |
+| `[d` / `]d` | Previous / next diagnostic | builtin diagnostic |
+| `[h` / `]h` | Previous / next git hunk | gitsigns |
+| `gcc` / `gc{motion}` | Toggle comment | builtin (Neovim 0.10+) |
+| `sa` / `sd` / `sr` | Surround add/delete/replace | mini.surround |
+| `C-d` / `C-u` | Half-page with centering | keymaps.lua |
+| `J` / `K` (visual) | Move selection up/down | mini.move |
+| `<` / `>` (visual) | Indent, stay in visual | keymaps.lua |
+| `C-s` | Save | keymaps.lua |
 
-**Example**:
-```lua
--- OLD: keymaps.nix
-{
-  mode = "n";
-  key = "<leader>f";
-  action = "+find/file";
-  options.desc = "Find";
-}
+#### Leader Key Groups (Space as leader)
 
--- NEW: keymaps.lua
-map("n", "<leader>f", "<nop>", { desc = "Find" })
--- mini.clue will auto-discover subkeys
+```
+<leader>f  Find
+  ff  Find files
+  fg  Live grep
+  fb  Buffers
+  fr  Recent files
+
+<leader>c  Code (LSP)
+  ca  Code action
+  cr  Rename
+  cf  Format
+  cd  Line diagnostic (float)
+
+<leader>g  Git
+  gs  Stage hunk
+  gr  Reset hunk
+  gp  Preview hunk
+  gb  Blame line
+  gg  Neogit (full git UI)
+  gd  Diff view
+
+<leader>d  Debug
+  db  Toggle breakpoint
+  dc  Continue
+  di  Step into
+  do  Step out
+  dO  Step over
+  dt  Terminate
+  du  Toggle DAP UI
+
+<leader>t  Test
+  tt  Run file
+  tr  Run nearest
+  ts  Toggle summary
+  to  Show output
+
+<leader>u  UI toggles
+  ul  Toggle line numbers
+  ur  Toggle relative numbers
+  uw  Toggle wrap
+  uh  Toggle inlay hints
+  uf  Toggle format-on-save
+
+<leader>q  Session/Quit
+  qq  Quit all
+  qs  Save session
+  qr  Restore session
+
+<leader>e  File explorer (mini.files)
+<leader>h  Clear search highlight
+<leader>x  Diagnostics to quickfix list
 ```
 
----
-
-### C. LANGUAGE SERVERS → Tier 1 (Builtin) + Tier 3 (nvim-lspconfig)
-
-**Current**: lsp/lsp.nix (clangd, lua_ls, nil_ls, eslint, pyright, ruff-lsp, rust-analyzer)
-**Target**: `lua/plugins/lsp.lua`
-
-**Strategy**:
-- Neovim 0.11+ has built-in `vim.lsp.config()` API
-- nix_neovim already uses this approach ✅
-- Minimal plugin dependency (just nvim-lspconfig for server configs)
-
-**Status**: ✅ READY - Already demonstrated in nix_neovim/lua/plugins/lsp.lua
+**Total: ~40 keybindings.** Down from 80+. Every binding has exactly one purpose.
+No duplicates. No ambiguity about "which tool handles this."
 
 ---
 
-### D. CODE FORMATTING → Tier 3 (conform.nvim)
+### Linting & Formatting: Clean Ownership
 
-**Current**: conform.nix (7 language formatters)
-**Target**: `lua/plugins/conform.lua` (new file)
+The rule is simple: **one tool per language per concern**. No double-linting.
 
-**Challenge**: No built-in Neovim formatting UI
-**Solution**: Keep conform.nvim but simplify configuration
+| Language | Linter | Formatter | Notes |
+|----------|--------|-----------|-------|
+| Python | pyright (LSP, types) | ruff (conform) | Drop ruff-lsp entirely. Pyright handles type checking. Conform runs ruff for formatting. nvim-lint runs ruff for linting. No double-linting because pyright and ruff check different things. |
+| Lua | lua_ls (LSP) | stylua (conform) | lua_ls provides diagnostics. stylua formats. |
+| Nix | nil_ls (LSP) | alejandra (conform) | statix via nvim-lint for extra Nix linting if desired. |
+| JS/TS | eslint (LSP) | prettierd (conform) | Drop eslint_d from nvim-lint. eslint LSP handles linting. Prettier handles formatting. No overlap. |
+| Rust | rust-analyzer (LSP) | rustfmt (conform) | rust-analyzer does everything. rustfmt for formatting. |
+| C/C++ | clangd (LSP) | clangd (LSP format) | clangd handles both. |
+
+**Key change**: ruff-lsp is removed. It was providing linting (duplicated by nvim-lint's
+ruff) AND formatting (duplicated by conform's ruff_format). Instead: nvim-lint runs ruff
+for linting, conform runs ruff for formatting, pyright handles type checking. Three
+tools, zero overlap. Similarly, eslint_d is removed from nvim-lint because eslint LSP
+provides the same diagnostics.
+
+---
+
+### Terminal Strategy
+
+Instead of toggleterm.nvim, use 10 lines of Lua:
 
 ```lua
--- lua/plugins/conform.lua
-require("conform").setup({
-  formatters_by_ft = {
-    python = { "ruff_format" },
-    lua = { "stylua" },
-    -- ... etc
-  },
-  format_on_save = { timeout_ms = 500, lsp_format = "fallback" },
+-- Toggle a persistent terminal buffer
+local term_buf = nil
+vim.keymap.set("n", "<A-i>", function()
+  if term_buf and vim.api.nvim_buf_is_valid(term_buf) then
+    local wins = vim.fn.win_findbuf(term_buf)
+    if #wins > 0 then
+      vim.api.nvim_win_close(wins[1], true)
+    else
+      vim.cmd("botright split | buffer " .. term_buf)
+      vim.cmd("resize 15")
+    end
+  else
+    vim.cmd("botright split | terminal")
+    term_buf = vim.api.nvim_get_current_buf()
+    vim.cmd("resize 15")
+  end
+end, { desc = "Toggle terminal" })
+```
+
+This gives you the same Alt-i toggle behavior without a plugin. The terminal is
+persistent across toggles. It opens at the bottom. 15 lines high. Done.
+
+---
+
+### Notification Strategy
+
+One system: mini.notify.
+
+```lua
+require("mini.notify").setup()
+vim.notify = require("mini.notify").make_notify()
+```
+
+Two lines. Replaces nvim-notify + fidget + noice's notification layer. For LSP progress,
+add a small autocmd:
+
+```lua
+vim.api.nvim_create_autocmd("LspProgress", {
+  callback = function(ev)
+    local data = ev.data
+    if data and data.params then
+      local val = data.params.value
+      if val and val.message then
+        vim.notify(val.message, vim.log.levels.INFO)
+      end
+    end
+  end,
 })
 ```
 
-**Status**: ✅ STRAIGHTFORWARD - Simple translation
+This replaces fidget.nvim entirely with ~10 lines of code using Neovim's native
+`LspProgress` event.
 
 ---
 
-### E. CODE LINTING → Tier 3 (nvim-lint)
+## Part 4: Migration Path
 
-**Current**: nvim-lint.nix (6 language linters)
-**Target**: `lua/plugins/lint.lua` (new file)
+### Phase 1: Foundation (The Base)
 
-```lua
--- lua/plugins/lint.lua
-require("lint").linters_by_ft = {
-  python = { "ruff" },
-  nix = { "statix" },
-  -- ... etc
-}
-```
+Start from the nix_neovim MVP. It already has the right architecture:
+- `config/options.lua` -- bring over all vim.opt settings from sets.nix
+- `config/keymaps.lua` -- implement the streamlined keymap table above
+- `plugins/mini.lua` -- expand from current MVP to include all mini modules listed above
 
-**Status**: ✅ STRAIGHTFORWARD - Simple translation
+**Test gate**: Open Neovim. Navigate files with mini.pick. Edit code. Verify mini
+modules work. This should take 1-2 hours.
 
----
+### Phase 2: Language Intelligence
 
-### F. COMPLETION → Tier 3 (Mini.completion alternative)
+- `plugins/lsp.lua` -- add all language servers (expand from current 3 to full set)
+- `plugins/format.lua` -- add conform.nvim with clean ownership table
+- `plugins/lint.lua` -- add nvim-lint with no double-linting
+- `plugins/treesitter.lua` -- treesitter + context
 
-**Current**: cmp.nix + copilot-cmp.nix + luasnip.nix (complex multi-source)
-**Target**: Option A or Option B
+**Test gate**: Open a Python file. Verify: diagnostics from pyright, formatting from
+ruff via conform, hover/definition/references via native LSP. No duplicate diagnostics.
+This should take 2-3 hours.
 
-**Option A: Keep Nvim-CMP (Familiar, well-tested)**
-```lua
--- lua/plugins/completion.lua
-require("cmp").setup({
-  sources = {
-    { name = "nvim_lsp" },
-    { name = "copilot" },
-    { name = "buffer" },
-    { name = "path" },
-  },
-})
-```
-- **Pros**: Feature parity, Copilot support
-- **Cons**: Extra dependency, more configuration
+### Phase 3: Git
 
-**Option B: Switch to Mini.completion (Simpler, builtin-friendly)**
-```lua
--- Already in nix_neovim!
-require("mini.completion").setup()
-```
-- **Pros**: Built on builtin, simpler, fewer dependencies
-- **Cons**: Less feature-rich, no Copilot integration
+- `plugins/git.lua` -- gitsigns + neogit + diffview
 
-**Recommendation**: **Option A (Keep CMP) for now**
-- Your workflow is proven with CMP
-- Copilot integration is valuable
-- Migration cost > value of simplification
-- Revisit if completion becomes pain point
+**Test gate**: Make a change. See gutter signs (from gitsigns only, not mini.diff).
+Stage a hunk. Open neogit. Commit. 1 hour.
 
-**Status**: ⚠️ MEDIUM EFFORT - Multi-file consolidation
+### Phase 4: Advanced (On Demand)
+
+- `plugins/dap.lua` -- debugging configs
+- `plugins/test.lua` -- neotest configs
+- `plugins/tools.lua` -- obsidian, markdown-preview if desired
+
+**Test gate**: Set a breakpoint. Run a test. These are complex but self-contained.
+2-3 hours.
+
+### Phase 5: Validate and Cut Over
+
+- Run both configs side by side for a day
+- Verify every daily workflow works in the new config
+- Archive the old config directory
+- Update the flake
+
+**Total estimated effort**: 8-12 hours (not 14-20 like the previous estimate, because
+we're cutting 60% of the plugins instead of migrating them)
 
 ---
 
-### G. FUZZY FINDING → Tier 3 (Mini.pick + optional Telescope)
+## Part 5: Summary -- What Changed From the Previous Overview
 
-**Current**: telescope.nix + project.nvim (feature-rich, ~10 pickers)
-**Target**: Hybrid approach
+The previous overview was a 1:1 inventory that proposed migrating 50+ plugins to Lua
+with a 30% reduction to ~35 plugins. This revision takes a fundamentally different
+approach:
 
-**Strategy A: Mini.pick (Simpler)**
-```lua
--- lua/plugins/mini.lua
-require("mini.pick").setup()
--- Already in nix_neovim, covers most needs
-```
+| Aspect | Previous Overview | This Revision |
+|--------|-------------------|--------------|
+| Philosophy | "Preserve all functionality" | "Preserve all *needed* functionality, cut the rest" |
+| Plugin count | ~35 (from 50+) | ~12 (from 50+) |
+| Redundancy | Identified some, kept most | Identified all, eliminated all |
+| Mini.nvim role | "Supplement" | "Primary framework" |
+| LSPSaga | "Keep if you want polish" | "Cut -- Neovim 0.11+ does this natively" |
+| Telescope | "Keep for advanced features" | "Replace with mini.pick" |
+| Notification | "Replace notify with mini.notify" | "Replace ALL THREE (notify + fidget + noice) with mini.notify" |
+| Completion | "Keep nvim-cmp as-is" | "Start with mini.completion, add blink.cmp if needed" |
+| Terminal | "Keep toggleterm" | "10 lines of Lua" |
+| Effort estimate | 14-20 hours | 8-12 hours (less migration, more deletion) |
+| Mental model | 80+ keybindings, 10+ categories | ~40 keybindings, 7 categories |
 
-**Strategy B: Keep Telescope (Feature parity)**
-```lua
--- lua/plugins/telescope.lua
-require("telescope").setup({ ... })
-```
-
-**Recommendation**: **Gradual Migration**
-1. Start with `mini.pick` for basic file/grep/buffer operations
-2. Keep `telescope` as optional for advanced features (diagnostics, undo, etc.)
-3. Provide both, deprecate Telescope in future version
-
-**Current Status**: ✅ PARTIAL - mini.pick ready, Telescope config needed
-
----
-
-### H. DEBUGGING → Tier 3 (nvim-dap)
-
-**Current**: dap.nix + nvim-dap-ui (15+ keybindings)
-**Target**: `lua/plugins/dap.lua`
-
-**Challenge**: DAP is complex, requires adapter management
-**Solution**: 
-1. Keep nvim-dap + nvim-dap-ui (no good builtin alternative)
-2. Translate configuration from Nix to Lua
-3. Re-implement keybindings in keymaps.lua
-
-```lua
--- lua/plugins/dap.lua
-local dap = require("dap")
-dap.adapters.python = { ... }
-dap.configurations.python = { ... }
-```
-
-**Status**: ⚠️ MEDIUM EFFORT - Straightforward translation, moderate complexity
+The key insight: **migration is harder than starting clean**. The previous plan tried to
+faithfully translate 62 Nix modules into Lua. This plan asks "what do you actually need?"
+and builds only that. The nix_neovim MVP already proved the architecture works. Now we
+just fill in the gaps -- and there are fewer gaps than expected, because Neovim itself
+has gotten much better.
 
 ---
 
-### I. TESTING → Tier 3 (neotest)
+## Appendix A: Neovim 0.11+ Builtin Features That Replace Plugins
 
-**Current**: neotest.nix (Python, Vitest, Plenary adapters)
-**Target**: `lua/plugins/neotest.lua`
-
-**Challenge**: Adapter management
-**Solution**: Translate configuration
-
-```lua
--- lua/plugins/neotest.lua
-require("neotest").setup({
-  adapters = {
-    require("neotest-python"),
-    require("neotest-vitest"),
-  },
-})
-```
-
-**Status**: ✅ STRAIGHTFORWARD - Simple translation
-
----
-
-### J. GIT INTEGRATION → Tier 2/3 Hybrid
-
-| Feature | Current | Target | Status |
-|---------|---------|--------|--------|
-| **Gitsigns** | gitsigns.nix | lua/plugins/gitsigns.lua | ✅ Straightforward |
-| **Neogit** | neogit.nix | lua/plugins/neogit.lua | ✅ Straightforward |
-| **Diffview** | diffview.nix | lua/plugins/diffview.lua | ✅ Straightforward |
-| **Octo** | octo.nix | CONSIDER: Tier 4 | ⚠️ Niche feature |
-
-**Recommendation for Octo**: 
-- **Current Usage**: Not critical to daily workflow
-- **Action**: Keep but deprioritize, consider removing if maintenance burden
-- **Alternative**: Use GitHub CLI or GitHub web UI
+| Builtin Feature | API | Plugin It Replaces |
+|----------------|-----|-------------------|
+| LSP config | `vim.lsp.config()`, `vim.lsp.enable()` | nvim-lspconfig (partially) |
+| LSP hover | `vim.lsp.buf.hover()` | LSPSaga hover |
+| LSP definition | `vim.lsp.buf.definition()` | LSPSaga finder |
+| LSP references | `vim.lsp.buf.references()` | LSPSaga finder |
+| LSP rename | `vim.lsp.buf.rename()` | LSPSaga rename |
+| LSP code action | `vim.lsp.buf.code_action()` | LSPSaga code action |
+| Diagnostics float | `vim.diagnostic.open_float()` | LSPSaga / Trouble |
+| Diagnostic jump | `vim.diagnostic.jump({count=1})` | LSPSaga diagnostic jump |
+| Diagnostic list | `vim.diagnostic.setqflist()` | Trouble.nvim |
+| Inlay hints | `vim.lsp.inlay_hint.enable()` | LSPSaga |
+| Snippet engine | `vim.snippet.expand()`, `vim.snippet.jump()` | LuaSnip (basic usage) |
+| Comment toggle | `gc` / `gcc` operators | mini.comment / Comment.nvim |
+| Floating borders | `vim.lsp.handlers` border config | Dressing.nvim borders |
+| LspProgress event | `vim.api.nvim_create_autocmd("LspProgress", ...)` | fidget.nvim |
 
 ---
 
-### K. UI/UX ENHANCEMENTS → Mixed Tier
+## Appendix B: mini.nvim Module Reference (Only What We Use)
 
-| Feature | Current | Target | Status |
-|---------|---------|--------|--------|
-| **Catppuccin** | base16/catppuccin.nix | lua/plugins/colorscheme.lua | ✅ Straightforward |
-| **Alpha Dashboard** | alpha.nix | lua/plugins/starter.lua | ✅ Ready (nix_neovim) |
-| **Noice** | noice.nix | lua/plugins/noice.lua | ⚠️ Consider Mini |
-| **Notify** | nvim-notify.nix | mini.notify | ✅ Use Mini |
-| **Dressing** | dressing-nvim.nix | lua/plugins/dressing.lua | ✅ Straightforward |
-| **Bufferline** | bufferline.nix | lua/plugins/bufferline.lua | ✅ Straightforward |
-| **Indent-blankline** | indent-blankline.nix | lua/plugins/indent-blankline.lua | ✅ Straightforward |
-| **Lualine** | lualine.nix | lua/plugins/lualine.lua OR mini.statusline | ⚠️ Consider Mini |
+| Module | Config Lines | What It Does |
+|--------|-------------|-------------|
+| `mini.ai` | 1 | Extended text objects: `va)`, `vi"`, function args, etc. |
+| `mini.surround` | 1 | `sa`/`sd`/`sr` for add/delete/replace surroundings |
+| `mini.pairs` | 1 | Auto-close `(`, `[`, `{`, `"`, `'` |
+| `mini.pick` | 1-5 | Fuzzy finder. `MiniPick.builtin.files()`, `.grep_live()`, `.buffers()` |
+| `mini.files` | 1 | File explorer. Navigate with hjkl, create/rename/delete files. |
+| `mini.notify` | 2 | `vim.notify` replacement with floating window display |
+| `mini.statusline` | 1 | Mode + file + diagnostics + git + position. Zero config. |
+| `mini.tabline` | 1 | Shows open buffers/tabs. Zero config. |
+| `mini.indentscope` | 1 | Animated vertical line showing current scope |
+| `mini.cursorword` | 1 | Auto-highlights all occurrences of word under cursor |
+| `mini.sessions` | 3 | Auto-save/restore sessions by directory |
+| `mini.starter` | ~30 | Dashboard with recent files, sessions, builtin actions |
+| `mini.clue` | ~15 | After pressing `<leader>`, shows available continuations |
+| `mini.move` | 1 | Alt+h/j/k/l to move lines or selections |
+| `mini.trailspace` | 1 | Highlights trailing whitespace, `:lua MiniTrailspace.trim()` |
 
-**Recommendations**:
-1. **Replace Notify with mini.notify**: Already in nix_neovim, simpler ✅
-2. **Consider Noice vs builtin**: Noice adds complexity, evaluate if worth it
-3. **Lualine vs mini.statusline**: 
-   - Keep Lualine if you heavily customize it
-   - Switch to mini.statusline if default is good enough
-   - nix_neovim uses mini.statusline (works well)
-
----
-
-### L. UTILITIES → Mixed Tier
-
-| Feature | Current | Recommendation | Status |
-|---------|---------|-----------------|--------|
-| **Persistence** (Sessions) | persistence.nix | lua/plugins/sessions.lua | ✅ Ready (nix_neovim) |
-| **Toggleterm** | toggleterm.nix | lua/plugins/toggleterm.lua | ✅ Straightforward |
-| **Tmux Navigator** | tmux-navigator.nix | lua/plugins/tmux-navigator.lua | ✅ Straightforward |
-| **Illuminate** | illuminate.nix | Keep but keep disabled | ⚠️ Disabled in current |
-| **Todo Comments** | todo-comments.nix | lua/plugins/todo-comments.lua | ✅ Straightforward |
-| **Better-escape** | better-escape.nix | Tier 4 (low value) | ❌ Consider removing |
-| **Undotree** | undotree.nix | lua/plugins/undotree.lua | ✅ Straightforward |
-| **Vim-be-good** | vim-be-good.nix | Tier 4 (learning only) | ❌ Consider removing |
-| **Markdown Preview** | markdown-preview.nix | lua/plugins/markdown-preview.lua | ✅ Straightforward |
-| **NVim-colorizer** | nvim-colorizer.nix | lua/plugins/colorizer.lua | ✅ Straightforward |
-| **Wilder** | wilder.nix | Tier 4 (command completion overkill) | ❌ Consider removing |
-| **Plenary** | plenary.nix | Implicit dependency | ✅ Keep (auto-pulled) |
-| **Mini Suite** (ai, basics, comment, diff, pairs, clue) | mini/default.nix | lua/plugins/mini.lua | ✅ Ready |
-
-**Removal Candidates** (Tier 4):
-- `better-escape` - Neovim handles escaping fine
-- `vim-be-good` - Only useful for practice sessions
-- `wilder` - overkill for command completion
+**Total mini.nvim config**: ~65 lines for 15 modules. Compare to 62 separate Nix files.
 
 ---
 
-### M. LANGUAGE-SPECIFIC → Tier 3
+## Appendix C: Conceptual Simplification Table
 
-| Feature | Current | Target | Status |
-|---------|---------|--------|--------|
-| **Treesitter** | treesitter.nix | lua/plugins/treesitter.lua | ✅ Straightforward |
-| **Treesitter Context** | treesitter-context.nix | lua/plugins/treesitter-context.lua | ✅ Straightforward |
-| **Treesitter Textobjects** | treesitter-textobjects.nix | lua/plugins/treesitter-textobjects.lua | ✅ Straightforward |
-| **Conjure** (Fennel) | languages/fennel.nix | lua/plugins/conjure.lua | ✅ Straightforward |
-| **Obsidian** | obsidian/default.nix | lua/plugins/obsidian.lua | ✅ Straightforward |
+For every task you do in the editor, there is now exactly one answer:
 
----
+| Task | How | Tool |
+|------|-----|------|
+| Find a file | `<leader>ff` | mini.pick |
+| Search in files | `<leader>fg` | mini.pick |
+| Switch buffer | `<leader>fb` | mini.pick |
+| Browse files | `<leader>e` | mini.files |
+| See diagnostics | `[d`/`]d` to jump, `<leader>cd` for float, `<leader>x` for list | builtin |
+| Hover docs | `K` | builtin LSP |
+| Go to definition | `gd` | builtin LSP |
+| See references | `gr` | builtin LSP |
+| Rename symbol | `<leader>cr` | builtin LSP |
+| Code action | `<leader>ca` | builtin LSP |
+| Format code | Auto on save, `<leader>cf` manual | conform.nvim |
+| Stage git hunk | `<leader>gs` | gitsigns |
+| Git commit/push | `<leader>gg` | neogit |
+| Toggle terminal | `<A-i>` | 10 lines of Lua |
+| Session restore | Automatic on open | mini.sessions |
+| See available keys | Press `<leader>` and wait | mini.clue |
 
-## Part 4: Recommended Plugin Stack (Final)
-
-### Core Plugins (Must Keep)
-
-1. **nvim-lspconfig** - Language servers
-2. **conform.nvim** - Code formatting
-3. **nvim-lint** - Code linting
-4. **nvim-cmp** + copilot-cmp + luasnip - Completion (current workflow)
-5. **gitsigns.nvim** - Git decorations
-6. **nvim-treesitter** - Syntax highlighting
-7. **mini.nvim** - Core ergonomics + UI polish
-
-### Important Plugins (Keep)
-
-8. **nvim-dap** + nvim-dap-ui - Debugging
-9. **neotest** - Testing framework
-10. **telescope.nvim** - Advanced picking (optional, use mini.pick for basics)
-11. **toggleterm.nvim** - Terminal integration
-12. **catppuccin** - Colorscheme
-13. **dressing.nvim** - Input/select UI
-14. **bufferline.nvim** - Buffer line
-15. **persist.nvim** (or mini.sessions) - Session management
-16. **neogit.nvim** - Git workflow
-17. **diffview.nvim** - Diff viewing
-
-### Optional Plugins (Can Keep or Remove)
-
-18. **lualine.nvim** vs `mini.statusline` - Status line (consider simplifying to mini)
-19. **noice.nvim** - Message UI (adds complexity, optional)
-20. **octo.nvim** - GitHub integration (niche, consider removing)
-21. **undotree.nvim** - Undo visualization
-22. **todo-comments.nvim** - Todo highlighting
-23. **markdown-preview.nvim** - Markdown preview
-24. **nvim-colorizer.lua** - Color preview
-25. **conjure** - Fennel REPL
-26. **obsidian.nvim** - Note vault
-
-### Removal Candidates (Tier 4)
-
-- ❌ **better-escape** (not needed)
-- ❌ **vim-be-good** (practice only)
-- ❌ **wilder.nvim** (overkill for command line)
-- ❌ **indent-blankline** (mini.indentscope covers this)
-- ❌ **lspkind.nvim** (cmp provides icons)
-
-### Final Plugin Count
-
-- **Current**: 50+ plugins across 62 Nix modules
-- **Proposed**: ~35-40 plugins in consolidated lua config
-- **Reduction**: ~30% fewer plugins, same functionality
+No ambiguity. No "was that Telescope or mini.pick?" No "do I use Trouble or the
+diagnostic float?" One tool per job.
 
 ---
 
-## Part 5: Implementation Roadmap
-
-### Phase 1: Foundation (Week 1)
-- [ ] Copy nix_neovim as base
-- [ ] Migrate editor options (sets.nix → options.lua)
-- [ ] Migrate keybindings (keymaps.nix → keymaps.lua)
-- [ ] Test with basic navigation
-
-### Phase 2: Core Plugins (Week 2)
-- [ ] LSP configuration (already done in nix_neovim)
-- [ ] Conform + nvim-lint
-- [ ] Treesitter + extensions
-- [ ] Verify language support works
-
-### Phase 3: Completion & Picking (Week 3)
-- [ ] Nvim-CMP + Copilot migration
-- [ ] Luasnip snippet setup
-- [ ] Telescope or mini.pick configuration
-- [ ] Test completion workflows
-
-### Phase 4: Advanced Features (Week 4)
-- [ ] DAP configuration
-- [ ] Neotest setup
-- [ ] Git integrations (gitsigns, neogit, diffview)
-- [ ] Test debugging workflows
-
-### Phase 5: Polish (Week 5)
-- [ ] UI enhancements (colorscheme, bufferline, lualine)
-- [ ] Terminal integration (toggleterm)
-- [ ] Session management
-- [ ] Special tools (Obsidian, todo-comments, undotree)
-
-### Phase 6: Testing & Documentation (Week 6)
-- [ ] Full integration testing
-- [ ] Create migration guide
-- [ ] Document keybindings in lua
-- [ ] Performance profiling vs nixvim
-
----
-
-## Part 6: Appendix - Simplification Recommendations
-
-### A. UI Consolidation
-
-**Current State**: 5 separate UI plugins (Alpha, Noice, Notify, Dressing, Lualine)
-**Recommendation**: Use builtin + mini.nvim where possible
-
-```lua
--- BEFORE (5 plugins, complex configuration)
-alpha → noice → notify → dressing → lualine
-
--- AFTER (simplified)
-mini.starter → mini.notify → builtin input → mini.statusline
-OR
-mini.starter → noice (if you love it) → mini.notify → dressing → lualine
-```
-
-**Evaluation Matrix**:
-| Feature | Builtin | mini.nvim | External |
-|---------|---------|-----------|----------|
-| Dashboard | Alpha | mini.starter | ✅ mini.starter |
-| Notifications | ❌ | mini.notify | ✅ mini.notify |
-| Input/Select | vim.ui.input | ❌ | ✅ dressing.nvim |
-| Status Line | ❌ | mini.statusline | lualine ✅ |
-| Messages | builtin | ❌ | noice ✅ |
-
-**Recommendation**: Replace Notify with `mini.notify`, evaluate Noice (nice but not essential)
-
----
-
-### B. Completion Ecosystem Simplification
-
-**Current**: 6 completion sources (LSP, Emoji, Buffer, Copilot, Path, Snippets)
-**Options**:
-
-**Option 1: Keep CMP as-is** (recommended for now)
-- Pros: Proven workflow, Copilot support
-- Cons: Moderate complexity
-
-**Option 2: Simplify to mini.completion**
-- Pros: ~70% fewer lines of code
-- Cons: No Copilot, less customizable
-
-**Recommendation**: Stick with Option 1, revisit in 6 months
-
----
-
-### C. Fuzzy Finding Consolidation
-
-**Current**: Telescope (10+ pickers) + project.nvim
-**Recommended**: Use mini.pick for 80% of operations, keep Telescope for advanced
-
-```lua
--- Core operations (use mini.pick)
-<leader>ff - files
-<leader>/ - grep
-<leader>fb - buffers
-
--- Advanced (use telescope if installed)
-<leader>st - todos (telescope)
-<leader>sd - diagnostics (telescope)
-<leader>sc - colorscheme (telescope)
-```
-
----
-
-### D. Debugging Complexity
-
-**Current**: DAP + DAP UI + Python adapter + Java remote (3 files, ~100 lines config)
-**Recommendation**: Keep as-is, it's already well-optimized
-
-**Why**: 
-- No good builtin alternative
-- Once configured, rarely touches
-- Justifies complexity through value
-
----
-
-### E. Git Workflow Consolidation
-
-**Current**: Gitsigns + Neogit + Diffview + Octo (4 plugins, complementary)
-**Recommendation**: 
-
-**Essential**:
-- ✅ Gitsigns (line-level diffs, staging)
-- ✅ Neogit (status/commit interface)
-- ✅ Diffview (side-by-side diffs)
-
-**Optional**:
-- ⚠️ Octo (GitHub-specific, niche use case)
-
-**Recommendation**: Consider removing Octo if rarely used, use GitHub CLI instead
-
----
-
-### F. Language-Specific Features
-
-**Current**: 6 language-specific integrations
-**Recommendation**: Keep all, they're modular and non-intrusive
-
----
-
-### G. Recommended Removal Candidates (to reduce maintenance)
-
-| Plugin | Reason | Impact |
-|--------|--------|--------|
-| better-escape | Neovim handles fine | Low (cosmetic only) |
-| vim-be-good | Training wheel only | Low (not needed for daily work) |
-| wilder | Overkill for cmd-line | Medium (adds complexity) |
-| indent-blankline | mini.indentscope equivalent | Low (visual only, mini is simpler) |
-| illuminate | Currently disabled | None (just remove) |
-| octo | Niche GitHub feature | Medium (can use CLI) |
-
-**Total Reduction**: Remove 6 plugins, save ~50 lines of config, lose minimal functionality
-
----
-
-## Part 7: Quick Win - Immediate Actions
-
-### 1. Replace Notify with mini.notify
-**Effort**: 10 minutes
-**Impact**: Reduces 1 dependency, uses builtin-friendly code
-
-### 2. Remove Disabled Plugins
-**Effort**: 5 minutes
-**Impact**: Cleaner codebase
-
-```
-- illuminate (disabled)
-- harpoon (commented out)
-- flash (commented out)
-```
-
-### 3. Remove Low-Value Tools
-**Effort**: 15 minutes
-**Impact**: Cleaner nix config, no functional loss
-
-```
-- better-escape
-- vim-be-good
-- wilder
-```
-
-### 4. Consolidate LSPSaga Usage
-**Effort**: 20 minutes
-**Impact**: Understand if builtin LSP is sufficient
-
-Current question: Do you need LSPSaga's advanced features (beacon, breadcrumbs, lightbulb)?
-- If **YES**: Keep it, translates fine to lua
-- If **NO**: Drop it, use builtin LSP instead
-
----
-
-## Part 8: Feature Parity Verification Checklist
-
-Use this checklist when migrating each feature:
-
-- [ ] **Options**: All vim.opt calls present and correct
-- [ ] **Keybindings**: All mappings registered with vim.keymap.set()
-- [ ] **Language Servers**: All servers configured in vim.lsp.config() + vim.lsp.enable()
-- [ ] **Formatting**: All formatters registered in conform
-- [ ] **Completion**: All sources configured in nvim-cmp
-- [ ] **Picking**: Mini.pick covers basic, Telescope available for advanced
-- [ ] **Git**: Gitsigns, Neogit, Diffview functional
-- [ ] **Debugging**: DAP adapters configured for Python/Rust/etc
-- [ ] **Testing**: Neotest adapters functional
-- [ ] **UI**: Colorscheme, bufferline, statusline configured
-- [ ] **Utilities**: Terminal, sessions, todos working
-
----
-
-## Part 9: Estimated Effort Summary
-
-| Phase | Task | Effort | Difficulty |
-|-------|------|--------|-----------|
-| 1 | Copy base, options, keymaps | 1-2h | Low |
-| 2 | LSP (mostly done) | 0.5h | Very Low |
-| 2 | Conform + Lint | 1h | Low |
-| 2 | Treesitter | 0.5h | Low |
-| 3 | CMP + Copilot + Snippets | 1-2h | Medium |
-| 3 | Picking (mini + telescope) | 1-2h | Medium |
-| 4 | DAP | 1-2h | Medium |
-| 4 | Neotest | 0.5h | Low |
-| 4 | Git tools | 1.5h | Low-Medium |
-| 5 | UI Polish | 1-2h | Low-Medium |
-| 5 | Utilities | 1h | Low |
-| 6 | Testing & Docs | 2-3h | Low |
-| **Total** | | **14-20h** | **Medium Average** |
-
-**Timeline**: ~3-4 weeks working part-time, 1 week full-time
-
----
-
-## Part 10: Final Recommendation
-
-### Summary
-
-Your nixvim config is **well-architected but increasingly complex**. The lua-based nix_neovim approach provides:
-
-✅ **Advantages**:
-1. Direct Lua control (no Nix abstraction)
-2. Smaller plugin ecosystem (consolidation via mini.nvim)
-3. Faster reload cycles (no Nix rebuild)
-4. Better maintainability (lua community > nixvim community)
-5. Easier to share/fork (standard neovim format)
-
-⚠️ **Trade-offs**:
-1. Effort: 15-20 hours migration time
-2. Needing Nix knowledge: No (just dependency management)
-3. Community size: Smaller (lua-based neovim > nixvim)
-
-### Recommended Path Forward
-
-1. **Use nix_neovim as base** - Already 80% of what you need
-2. **Migrate in phases** - Don't do everything at once
-3. **Keep nixvim reference** - Compare implementation as you go
-4. **Test thoroughly** - Each phase should be fully functional
-5. **Document as you go** - Create lua-based keymap reference
-
-### When to Start
-
-**Start when:**
-- You have a stable dev period (3-4 weeks)
-- You've tested nix_neovim MVP thoroughly
-- You're comfortable with lua basics
-
-**Wait if:**
-- Currently shipping critical features
-- Recent major nixvim config changes
-- Learning Lua would significantly slow you down
-
----
-
-## Appendix A: Plugin Dependency Graph
-
-```
-CORE ECOSYSTEM
-├── nvim-lspconfig (language servers)
-├── conform.nvim (formatting)
-├── nvim-lint (linting)
-├── nvim-cmp (completion)
-│   ├── copilot-cmp
-│   └── luasnip
-├── mini.nvim (multiple modules)
-└── nvim-treesitter (syntax)
-
-PICKING & NAVIGATION
-├── telescope.nvim (advanced picking)
-│   ├── telescope-fzf-native
-│   ├── telescope-ui-select
-│   └── telescope-undo
-├── mini.pick (basic picking)
-└── project.nvim
-
-DEBUGGING & TESTING
-├── nvim-dap
-│   ├── nvim-dap-ui
-│   └── nvim-dap-python
-└── neotest
-
-GIT WORKFLOW
-├── gitsigns.nvim
-├── neogit.nvim
-│   └── diffview.nvim
-└── octo.nvim
-
-UI/VISUAL
-├── catppuccin (colorscheme)
-├── bufferline.nvim
-├── lualine.nvim OR mini.statusline
-├── dressing.nvim
-├── noice.nvim
-└── indent-blankline.nvim
-
-UTILITIES & INTEGRATIONS
-├── persistence.nvim OR mini.sessions
-├── toggleterm.nvim
-├── tmux-navigator.nvim
-├── todo-comments.nvim
-├── undotree.vim
-├── markdown-preview.nvim
-├── nvim-colorizer.lua
-├── conjure (fennel)
-└── obsidian.nvim
-
-LEARNING/OPTIONAL
-├── vim-be-good (optional)
-├── illuminate.nvim (currently disabled)
-└── lspkind.nvim (superceded by cmp icons)
-```
-
----
-
-## Appendix B: Nix vs Lua Configuration Comparison
-
-| Aspect | Nixvim (Current) | Nix_Neovim (Target) |
-|--------|------------------|-------------------|
-| **Config Language** | Nix DSL | Lua |
-| **Plugin Management** | Nix home-manager | Nix flake |
-| **Options Setting** | nixvim.opts | vim.opt |
-| **Keybindings** | nixvim.keymaps | vim.keymap.set() |
-| **Plugin Config** | Per-plugin .nix files | Per-plugin .lua files |
-| **LSP Setup** | nixvim.plugins.lsp | vim.lsp.config() + vim.lsp.enable() |
-| **Completion** | nixvim.plugins.cmp | require("cmp").setup() |
-| **Learning Curve** | Nix syntax + nixvim semantics | Lua + standard neovim APIs |
-| **Community Size** | Smaller | Large (neovim) |
-| **Documentation** | Limited (nixvim-specific) | Abundant (neovim) |
-| **Reload Time** | Slow (Nix rebuild) | Fast (lua reload) |
-| **Portability** | Linux/NixOS only | Cross-platform |
-| **Version Sync** | Manual | Auto via lockfile |
-
----
-
-## Appendix C: Mini.nvim Module Recommendations
-
-| Mini Module | Purpose | Replace |
-|-------------|---------|---------|
-| `mini.hues` | Colorscheme generation | (keep catppuccin if prefer, else use this) |
-| `mini.files` | File explorer | Could replace Telescope file picker |
-| `mini.ai` | Smart text objects | Native text objects supplement |
-| `mini.comment` | Line comments | Native alternative: keymaps |
-| `mini.surround` | Surround text | vim-surround alternative |
-| `mini.pairs` | Auto pair handling | nvim-autopairs alternative |
-| `mini.statusline` | Status line | Lualine alternative |
-| `mini.tabline` | Tab line | Builtin alternative |
-| `mini.indentscope` | Indent guide | indent-blankline alternative ✅ |
-| `mini.cursorword` | Highlight word | illuminate alternative |
-| `mini.pick` | Fuzzy picker | Telescope alternative |
-| `mini.completion` | Completion | nvim-cmp alternative |
-| `mini.notify` | Notifications | nvim-notify alternative ✅ |
-| `mini.sessions` | Session management | persistence.nvim alternative |
-| `mini.clue` | Keymap help | which-key alternative |
-| `mini.jump` | Smart jump | Native support |
-| `mini.move` | Move lines/blocks | Native alternative |
-| `mini.animate` | Animations | Optional polish |
-| `mini.trailspace` | Trailing spaces | Native linting |
-
-**✅ = Recommended replacements** (low-value to keep external alternative)
-
----
-
-## Appendix D: Alternative Approaches Not Recommended
-
-### Why NOT These?
-
-1. **Jump to nvim-lazy (plugin manager)**
-   - ❌ Nix handles dependencies better
-   - ❌ Incompatible with NixOS philosophy
-   - ✅ OK if leaving NixOS
-
-2. **Use AstroNvim/LazyVim/NVChad (pre-built configs)**
-   - ❌ Too opinionated
-   - ❌ Hard to customize
-   - ❌ Defeats purpose of daily driver
-
-3. **Keep using Nixvim indefinitely**
-   - ❌ Community stagnating
-   - ❌ Nix complexity not needed for neovim
-   - ❌ Slower to update plugins
-
-4. **Go back to pure Nix + init.vim**
-   - ❌ Ancient Neovim syntax
-   - ❌ Worse plugin ecosystem
-   - ❌ Harder to debug
-
----
-
-## Appendix E: Post-Migration Cleanup
-
-After completing migration to lua:
-
-1. **Archive current nixvim**
-   ```bash
-   cp -r config/ config.nixvim-backup/
-   ```
-
-2. **Update flake.nix**
-   - Remove all nixvim references
-   - Keep only nix_neovim module
-   - Update home-manager integration
-
-3. **Remove unused nix files**
-   - Delete 62 individual plugin .nix files
-   - Keep only flake.nix, hm-module.nix, plugins.nix
-
-4. **Create migration guide**
-   - Document what moved where
-   - Note any deprecations
-   - Provide troubleshooting steps
-
-5. **Performance benchmark**
-   - Measure Nix rebuild time savings
-   - Compare Neovim startup time
-   - Profile plugin load time
-
----
-
-## Appendix F: Knowledge Base & Resources
-
-### Key Documentation
-- [Neovim LSP](https://neovim.io/doc/user/lsp.html)
-- [vim.keymap.set() API](https://neovim.io/doc/user/api_global.html#nvim_set_keymap())
-- [mini.nvim comprehensive docs](https://github.com/echasnovski/mini.nvim)
-- [Conform.nvim](https://github.com/stevearc/conform.nvim)
-- [Nvim-CMP](https://github.com/hrsh7th/nvim-cmp)
-
-### Helpful Commands
-
-```lua
--- Inspect loaded plugins
-:lua print(vim.inspect(vim.g.loaded_packages))
-
--- Check registered keymaps
-:map (all), :nmap (normal), :imap (insert), etc.
-
--- LSP debugging
-:LspInfo (server info)
-:LspLog (debug log)
-
--- Performance profiling
-:lua require('vim.profiler').start('profile.log'); vim.cmd('e your_file.lua'); require('vim.profiler').stop()
-```
-
----
-
-## Final Notes
-
-This migration is **technically straightforward** but **requires dedication to detail**. The payoff is a more maintainable, faster-reloading, better-documented daily driver configuration.
-
-**Key success factors**:
-1. ✅ Use nix_neovim as a solid foundation
-2. ✅ Test each phase before moving to next
-3. ✅ Keep old config accessible for reference
-4. ✅ Document as you go
-5. ✅ Don't try to "improve" while migrating (one thing at a time)
-
-**You've got this!** The hard part (lua-based neovim config) is already proven in nix_neovim. You're just translating known patterns.
-
----
-
-**Document Generated**: 2026-03-01
-**nix_neovim Version**: MVP/POC phase
-**Daily Driver Version**: Feature-complete with 50+ plugins
+*Document revised: 2026-03-01*
+*Approach: Honest assessment, minimal viable config, builtin-first*
