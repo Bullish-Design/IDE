@@ -1,43 +1,32 @@
 { inputs }:
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 let
-  # mini.nvim pinned via flake input (flake = false)
+  # mini.nvim from flake input
   mini-nvim = pkgs.vimUtils.buildVimPlugin {
     pname = "mini.nvim";
-    # optional: keep in sync with your flake.nix ref/tag
     version = "pinned";
     src = inputs.mini-nvim-src;
   };
 
-  # Your existing plugin list (derivations)
-  pluginsFromRepo = import ./nvim/plugins.nix { inherit pkgs; };
+  # All plugins from imports
+  allPlugins = import ./plugins.nix { inherit pkgs; };
 
-  # Replace nixpkgs' mini-nvim with the pinned one (avoid duplicates)
-  plugins =
-    [ mini-nvim ]
-    ++ builtins.filter
-      (p:
-        let n = (p.pname or p.name or "");
-        in !(builtins.match "mini.*" n != null))
-      pluginsFromRepo;
 in
 {
   programs.neovim = {
     enable = true;
     vimAlias = true;
     viAlias = true;
-
-    plugins = plugins;
+    plugins = [ mini-nvim ] ++ allPlugins;
   };
 
-  # Deploy your whole config tree to ~/.config/nvim
   xdg.configFile."nvim" = {
     source = ./nvim;
     recursive = true;
   };
 
-  # Minimal helpers and LSP servers (optional but practical)
   home.packages = with pkgs; [
+    # CLI tools
     ripgrep
     fd
 
@@ -45,5 +34,33 @@ in
     lua-language-server
     nil
     bash-language-server
+    pyright
+    rust-analyzer
+    clangd
+    gopls
+    nodePackages.typescript-language-server
+    nodePackages.vscode-langservers-extracted
+
+    # Formatters
+    stylua
+    alejandra
+    ruff
+    prettierd
+    goimports
+    gofmt
+    clang-tools
+
+    # Linters
+    shellcheck
+    statix
+    ruff
+    jsonlint
+    yamllint
+
+    # DAP adapters
+    python3.pkgs.debugpy
+
+    # Optional
+    nodePackages.markdownlint-cli2
   ];
 }
