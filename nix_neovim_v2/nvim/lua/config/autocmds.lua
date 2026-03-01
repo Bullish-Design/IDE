@@ -1,19 +1,5 @@
 -- nvim/lua/config/autocmds.lua
 
--- Format on save (conform.nvim)
-vim.api.nvim_create_autocmd("BufWritePre", {
-  pattern = "*",
-  callback = function(args)
-    if vim.g.format_on_save ~= false then
-      vim.lsp.buf.format({
-        bufnr = args.buf,
-        async = false,
-        timeout_ms = 500,
-      })
-    end
-  end,
-})
-
 -- LSP Progress notifications (mini.notify)
 vim.api.nvim_create_autocmd("LspProgress", {
   callback = function(ev)
@@ -59,10 +45,15 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   end,
 })
 
--- Auto-close certain buffers
+-- Auto-close certain buffers (but not for plugins)
 vim.api.nvim_create_autocmd("BufEnter", {
   pattern = "*",
   callback = function()
+    local filetype = vim.bo.filetype
+    local exclude_ft = { ["starter"] = true, ["dapui"] = true, ["dap-repl"] = true, ["help"] = true }
+    if exclude_ft[filetype] then
+      return
+    end
     if vim.fn.winnr("$") == 1 and vim.fn.bufname("%") == "" and vim.fn.bufnr("%") > 1 then
       vim.cmd("bdelete!")
     end

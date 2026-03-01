@@ -15,9 +15,8 @@ require("mini.pairs").setup()
 
 -- File navigation
 require("mini.files").setup()
-require("mini.pick").setup({
-  ui_select = true,
-})
+require("mini.pick").setup()
+vim.ui.select = require("mini.pick").ui_select
 
 -- Statusline and tabline
 require("mini.statusline").setup()
@@ -26,7 +25,6 @@ require("mini.tabline").setup()
 -- Visual polish
 require("mini.indentscope").setup({ symbol = "│" })
 require("mini.cursorword").setup()
-require("mini.trailspace").setup()
 
 -- Sessions
 require("mini.sessions").setup({
@@ -52,11 +50,20 @@ require("mini.starter").setup({
 require("mini.clue").setup({
   triggers = {
     { mode = "n", keys = "<leader>" },
+    { mode = "v", keys = "<leader>" },
+    { mode = "n", keys = "[" },
+    { mode = "n", keys = "]" },
+    { mode = "n", keys = "g" },
+    { mode = "n", keys = "s" },
     { mode = "i", keys = "<C-x>" },
   },
   clues = {
-    require("mini.clue").gen_clue.zsh(),
-    require("mini.clue").gen_clue.builtin_keys(),
+    require("mini.clue").gen_clues.builtin_completion(),
+    require("mini.clue").gen_clues.g(),
+    require("mini.clue").gen_clues.z(),
+    require("mini.clue").gen_clues.windows(),
+    require("mini.clue").gen_clues.marks(),
+    require("mini.clue").gen_clues.registers(),
   },
 })
 

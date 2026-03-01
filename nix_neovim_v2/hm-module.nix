@@ -53,9 +53,10 @@ in
     # Linters
     shellcheck
     statix
-    ruff
     jsonlint
     yamllint
+    selene
+    golangci-lint
 
     # DAP adapters
     python3.pkgs.debugpy

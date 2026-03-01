@@ -23,18 +23,6 @@ require("conform").setup({
     if vim.g.format_on_save == false then
       return false
     end
-    local fname = vim.api.nvim_buf_get_name(bufnr)
-    local ext = vim.fn.fnamemodify(fname, ":e")
-    if ext == "py" then
-      return { timeout_ms = 500, lsp_fallback = true }
-    end
     return { timeout_ms = 500, lsp_fallback = true }
   end,
 })
-
-vim.formatexpr = function()
-  if vim.g.format_on_save == false then
-    return vim.fn["conform#formatexpr"]()
-  end
-  return vim.fn["conform#formatexpr"]()
-end

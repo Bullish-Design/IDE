@@ -1,5 +1,14 @@
 -- nvim/lua/plugins/codecompanion.lua
 
+-- Warn if API keys are missing
+local function check_api_key(env_var, name)
+  if os.getenv(env_var) == nil then
+    vim.notify(name .. " API key not found. Set " .. env_var .. " environment variable.", vim.log.levels.WARN)
+  end
+end
+check_api_key("ANTHROPIC_API_KEY", "Anthropic")
+check_api_key("OPENAI_API_KEY", "OpenAI")
+
 require("codecompanion").setup({
   adapters = {
     anthropic = function()

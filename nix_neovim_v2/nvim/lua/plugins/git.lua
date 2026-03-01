@@ -41,7 +41,7 @@ require("gitsigns").setup({
     map("n", "<leader>gR", gs.reset_buffer, "Reset buffer")
     map("n", "<leader>gp", gs.preview_hunk, "Preview hunk")
     map("n", "<leader>gb", gs.blame_line, "Blame line")
-    map("n", "<leader>gD", gs.diffthis, "Diff this")
+    map("n", "<leader>gd", gs.diffthis, "Diff this")
     map("n", "<leader>gD", function() gs.diffthis("~") end, "Diff this (cached)")
   end,
 })

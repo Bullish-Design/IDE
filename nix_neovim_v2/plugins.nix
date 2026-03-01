@@ -16,20 +16,29 @@ in
 
   # Treesitter
   vp.nvim-treesitter
+  vp.nvim-treesitter-context
 
   # Git
   vp.gitsigns-nvim
   vp.neogit
   vp.diffview-nvim
+  vp.plenary-nvim
 
   # DAP
   vp.nvim-dap
   vp.nvim-dap-ui
+  vp.nvim-dap-python
+  vp.nvim-nio
 
   # Testing
   vp.neotest
   vp.neotest-python
   vp.neotest-vitest
+  vp.neotest-rust
+
+  # Tools
+  vp.obsidian-nvim
+  vp.markdown-preview-nvim
 
   # AI Companion
   (import ./nvim/plugins/codecompanion.nix { inherit pkgs; })

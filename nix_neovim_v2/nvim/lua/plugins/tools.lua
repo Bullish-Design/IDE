@@ -11,7 +11,7 @@ if vim.fn.isdirectory(obsidian_path) == 1 then
       },
     },
     completion = {
-      nvim_cmp = true,
+      nvim_cmp = false,
       min_chars = 2,
     },
     templates = {

@@ -4,6 +4,9 @@ local opt = vim.opt
 local o = vim.o
 local g = vim.g
 
+-- Format on save toggle state
+g.format_on_save = true
+
 -- Clipboard
 opt.clipboard = "unnamedplus"
 
@@ -55,9 +58,9 @@ opt.termguicolors = true
 -- UI
 opt.signcolumn = "yes"
 opt.cursorline = true
-opt.cmdheight = 3
+opt.cmdheight = 1
 opt.showmode = true
-opt.pumheight = 0
+opt.pumheight = 15
 opt.laststatus = 3
 
 -- Folding
@@ -74,7 +77,7 @@ opt.sidescrolloff = 8
 opt.colorcolumn = "120"
 
 -- Timeout
-opt.timeoutlen = 10
+opt.timeoutlen = 400
 
 -- Encoding
 opt.encoding = "utf-8"

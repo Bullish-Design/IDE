@@ -9,21 +9,7 @@ vim.diagnostic.config({
 })
 
 -- LSP borders for hover, definition, etc.
-local border = { { "╭", "FloatBorder" }, { "─", "FloatBorder" }, { "╮", "FloatBorder" }, { "│", "FloatBorder" }, { "╯", "FloatBorder" }, { "─", "FloatBorder" }, { "╰", "FloatBorder" }, { "│", "FloatBorder" } }
-
-local orig_hover = vim.lsp.handlers.hover
-vim.lsp.handlers.hover = function(_, result, ctx, config)
-  config = config or {}
-  config.border = border
-  orig_hover(_, result, ctx, config)
-end
-
-local orig_sig = vim.lsp.handlers.signature_help
-vim.lsp.handlers.signature_help = function(_, result, ctx, config)
-  config = config or {}
-  config.border = border
-  orig_sig(_, result, ctx, config)
-end
+local border = "rounded"
 
 -- LSP on_attach function
 local function on_attach(_, bufnr)
@@ -36,14 +22,14 @@ local function on_attach(_, bufnr)
   map("n", "gr", vim.lsp.buf.references, "References")
   map("n", "gD", vim.lsp.buf.declaration, "Go to declaration")
   map("n", "gi", vim.lsp.buf.implementation, "Go to implementation")
-  map("n", "K", vim.lsp.buf.hover, "Hover")
+  map("n", "K", function() vim.lsp.buf.hover({ border = border }) end, "Hover")
   map("n", "<leader>ca", vim.lsp.buf.code_action, "Code action")
   map("n", "<leader>cr", vim.lsp.buf.rename, "Rename")
   map("n", "<leader>cf", function() vim.lsp.buf.format({ async = true }) end, "Format")
   map("n", "<leader>cd", vim.diagnostic.open_float, "Line diagnostic")
 
   -- Inlay hints
-  vim.lsp.inlay_hint.enable(bufnr, true)
+  vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
 end
 
 -- Configure each language server
@@ -110,13 +96,7 @@ vim.lsp.config("bashls", {
 vim.lsp.enable("bashls")
 
 vim.lsp.config("eslint", {
-  on_attach = function(_, bufnr)
-    on_attach(_, bufnr)
-    vim.api.nvim_create_autocmd("BufWritePre", {
-      buffer = bufnr,
-      command = "EslintFixAll",
-    })
-  end,
+  on_attach = on_attach,
 })
 vim.lsp.enable("eslint")
 
@@ -156,15 +136,15 @@ vim.lsp.config("gopls", {
 })
 vim.lsp.enable("gopls")
 
-vim.lsp.config("ruff", {
-  on_attach = on_attach,
-  settings = {
-    ruff = {
-      lint = {
-        select = { "E", "F", "W", "I" },
-        ignore = { "E501" },
-      },
-    },
-  },
-})
-vim.lsp.enable("ruff")
+-- vim.lsp.config("ruff", {
+--   on_attach = on_attach,
+--   settings = {
+--     ruff = {
+--       lint = {
+--         select = { "E", "F", "W", "I" },
+--         ignore = { "E501" },
+--       },
+--     },
+--   },
+-- })
+-- vim.lsp.enable("ruff")

@@ -11,40 +11,21 @@ map("n", "<leader>h", "<cmd>nohlsearch<cr>", { desc = "Clear search highlight" }
 map("n", "<leader>ff", function() require("mini.pick").builtin.files() end, { desc = "Find files" })
 map("n", "<leader>fg", function() require("mini.pick").builtin.grep_live() end, { desc = "Live grep" })
 map("n", "<leader>fb", function() require("mini.pick").builtin.buffers() end, { desc = "Find buffers" })
-map("n", "<leader>fr", function() require("mini.pick").builtin.recent() end, { desc = "Recent files" })
+map("n", "<leader>fr", function() vim.cmd("browse oldfiles") end, { desc = "Recent files" })
 
 -- Navigation: File explorer (mini.files)
-map("n", "<leader>e", function() require("mini.files").toggle() end, { desc = "Toggle file explorer" })
-
--- LSP: Builtin (native) - these are core muscle memory
-map("n", "gd", vim.lsp.buf.definition, "Go to definition")
-map("n", "gr", vim.lsp.buf.references, "References")
-map("n", "gD", vim.lsp.buf.declaration, "Go to declaration")
-map("n", "gi", vim.lsp.buf.implementation, "Go to implementation")
-map("n", "K", vim.lsp.buf.hover, "Hover documentation")
-
--- LSP: Code actions (leader c)
-map("n", "<leader>ca", vim.lsp.buf.code_action, "Code action")
-map("n", "<leader>cr", vim.lsp.buf.rename, "Rename symbol")
-map("n", "<leader>cf", function() vim.lsp.buf.format({ async = true }) end, "Format")
-map("n", "<leader>cd", vim.diagnostic.open_float, "Line diagnostic")
+map("n", "<leader>e", function()
+  local mf = require("mini.files")
+  if mf.close() then
+    return
+  end
+  mf.open(vim.api.nvim_buf_get_name(0), false)
+end, { desc = "Toggle file explorer" })
 
 -- Diagnostics: Jump (builtin)
-map("n", "[d", vim.diagnostic.goto_prev, { desc = "Previous diagnostic" })
-map("n", "]d", vim.diagnostic.goto_next, { desc = "Next diagnostic" })
+map("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, { desc = "Previous diagnostic" })
+map("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, { desc = "Next diagnostic" })
 map("n", "<leader>x", function() vim.diagnostic.setqflist() end, { desc = "Diagnostics to quickfix" })
-
--- Git: Gitsigns (leader g)
-map("n", "<leader>gs", function() require("gitsigns").stage_hunk() end, { desc = "Stage hunk" })
-map("n", "<leader>gr", function() require("gitsigns").reset_hunk() end, { desc = "Reset hunk" })
-map("n", "<leader>gp", function() require("gitsigns").preview_hunk() end, { desc = "Preview hunk" })
-map("n", "<leader>gb", function() require("gitsigns").blame_line() end, { desc = "Blame line" })
-map("n", "<leader>gg", function() require("neogit").open() end, { desc = "Open Neogit" })
-map("n", "<leader>gd", function() require("diffview").open() end, { desc = "Open Diffview" })
-
--- Git: Hunk navigation
-map("n", "[h", function() require("gitsigns").prev_hunk() end, { desc = "Previous git hunk" })
-map("n", "]h", function() require("gitsigns").next_hunk() end, { desc = "Next git hunk" })
 
 -- Terminal: Toggle (10 lines of Lua, no plugin)
 local term_buf = nil
@@ -76,7 +57,7 @@ end, { desc = "Toggle format on save" })
 
 -- Session (leader q)
 map("n", "<leader>qq", "<cmd>qa<cr>", { desc = "Quit all" })
-map("n", "<leader>qs", function() require("mini.sessions").select("write") end, { desc = "Save session" })
+map("n", "<leader>qs", function() require("mini.sessions").write() end, { desc = "Save session" })
 map("n", "<leader>qr", function() require("mini.sessions").select("read") end, { desc = "Restore session" })
 
 -- Debug (leader d) - DAP
@@ -98,10 +79,6 @@ map("n", "<leader>to", function() require("neotest").output_panel.toggle() end, 
 map("v", "<", "<gv", { desc = "Indent left" })
 map("v", ">", ">gv", { desc = "Indent right" })
 
--- Visual: Move lines (mini.move)
-map("v", "J", ":m '>+1<cr>gv=gv", { desc = "Move selection down" })
-map("v", "K", ":m '<-2<cr>gv=gv", { desc = "Move selection up" })
-
 -- Half-page scrolling with centering
-map("n", "<C-d>", "zz<C-d>zz", { desc = "Half-page down" })
-map("n", "<C-u>", "zz<C-u>zz", { desc = "Half-page up" })
+map("n", "<C-d>", "<C-d>zz", { desc = "Half-page down" })
+map("n", "<C-u>", "<C-u>zz", { desc = "Half-page up" })
