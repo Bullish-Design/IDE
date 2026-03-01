@@ -1,0 +1,41 @@
+{
+  "nodes": {
+    "mini-nvim-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1766071746,
+        "narHash": "sha256-xmNZrQDptaNcECHSGtjownFyR1qxsP7lge8OAIFe8BU=",
+        "type": "tarball",
+        "url": "https://github.com/nvim-mini/mini.nvim/archive/refs/tags/v0.17.0.tar.gz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://github.com/nvim-mini/mini.nvim/archive/refs/tags/v0.17.0.tar.gz"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1772198003,
+        "narHash": "sha256-I45esRSssFtJ8p/gLHUZ1OUaaTaVLluNkABkk6arQwE=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "dd9b079222d43e1943b6ebd802f04fd959dc8e61",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "mini-nvim-src": "mini-nvim-src",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
